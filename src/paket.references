@@ -1,0 +1,6 @@
+Suave
+FsPickler
+FsPickler.Json
+FSharp.Data
+ServiceStack.OrmLite
+ServiceStack.OrmLite.Sqlite.Mono
