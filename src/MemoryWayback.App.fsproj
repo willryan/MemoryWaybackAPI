@@ -9,7 +9,7 @@
     <AssemblyName>MemoryWayback</AssemblyName>
     <BuildOrder>
       <String>Util.fs</String>
-      <String>Routing.fs</String>
+      <String>Media.fs</String>
       <String>App.fs</String>
       <String>Main.fs</String>
     </BuildOrder>
@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Routing.fs" />
+    <Compile Include="Media.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>

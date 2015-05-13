@@ -16,48 +16,45 @@ open System.IO
 open System.Text
 open Nessos.FsPickler
 open Nessos.FsPickler.Json
+open MemoryWayback.Media
 
-open MemoryWayback.Routing
-
-  //let logger = Loggers.sane_defaults_for Debug
+//let logger = Loggers.sane_defaults_for Debug
 
 let pickler = FsPickler.CreateJson(indent = true, omitHeader = true)
 
 let okJson o =
-  OK (pickler.PickleToString o) >>= Writers.setMimeType "application/json"
+  OK (pickler.PickleToString o) 
+  >>= Writers.setMimeType "application/json"
 
-let appOld =
+let handleQuery ctx =
+  printfn "%A" ctx.request.query
+  let fromValue = defaultArg (ctx.request.queryParam "from") ""
+  let toValue = defaultArg (ctx.request.queryParam "to") ""
+  let types = defaultArg (ctx.request.queryParam "types") ""
+  printfn "%s - %s : %s" fromValue toValue types
+  let o = {
+    From = DateTime.Parse fromValue
+    To = DateTime.Parse toValue
+    Types = Array.toList (types.Split ',')
+  }
+  (okJson <| findMedia o) ctx
+
+let app =
   choose
     [ GET >>= choose
-        [ path "/transaction" >>= okJson []
-          path "/goodbye" >>= OK "Good bye GET" ]
-      POST >>= choose
-        [ path "/hello" >>= OK "Hello POST"
-          path "/goodbye" >>= OK "Good bye POST" ] ]
-
-
-let handler resName actName ids =
-  OK (sprintf "OK: %s#%s %A" resName actName ids)
-
-let resources =
-  [
-  ]
+        [ path "/media-query" >>= handleQuery ]
+    ]
 
 let defaultArgs = [| "server" |]
 
 let startApp () =
-  let app = makeApp()
   startWebServer defaultConfig app
   0
 
 let start (args : string[]) =
   let realArgs = if (args.Length = 0) then defaultArgs else args
 
-  Resources <- resources
-  //Debugger.Break()
-
-  match args.[0] with
-  | "routes" -> Debug.printRouteDefs() ; 0
+  match realArgs.[0] with
   | "server" -> startApp()
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1
 
