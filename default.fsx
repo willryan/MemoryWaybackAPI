@@ -2,11 +2,15 @@
 
 open Fake
 
-Target "build" (fun _ ->
+Target "build_all" (fun _ ->
   MSBuildDebug "" "Build" [ "MemoryWayback.fsproj" ]
   |> Log "TestBuild-Output: "
 )
 
+Target "build_src" (fun _ ->
+  MSBuildDebug "" "Build" [ "src/MemoryWayback.App.fsproj" ]
+  |> Log "TestBuild-Output: "
+)
 
 Target "test" (fun _ ->
   let testDlls = !! ("test/bin/Debug/*Tests.dll")
@@ -16,6 +20,8 @@ Target "test" (fun _ ->
        DisableShadowCopy = true;
        OutputFile = "test/TestResults.xml"})
 )
+
+"build_all" ==> "test"
 
 let runApp args =
   let appExe = "src/bin/Debug/MemoryWayback.exe"
@@ -29,7 +35,6 @@ let runApp args =
 
 
 Target "server" (fun _ -> runApp "server")
-Target "routes" (fun _ -> runApp "routes")
 
 Target "spec" (fun _ ->
   // can't find file for some reason, or a mono issue

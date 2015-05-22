@@ -9,7 +9,9 @@
     <AssemblyName>MemoryWayback</AssemblyName>
     <BuildOrder>
       <String>Util.fs</String>
-      <String>Media.fs</String>
+      <String>DbTypes.fs</String>
+      <String>Types.fs</String>
+      <String>MediaQuery.fs</String>
       <String>App.fs</String>
       <String>Main.fs</String>
     </BuildOrder>
@@ -39,7 +41,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Media.fs" />
+    <Compile Include="DbTypes.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="MediaQuery.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
@@ -47,9 +51,6 @@
     <Folder Include="Content\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="sqlite3.dll">
-      <Paket>True</Paket>
-    </Content>
     <Content Include="Content\**\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -124,6 +125,35 @@
       <ItemGroup>
         <Reference Include="FsPickler.Json">
           <HintPath>..\packages\FsPickler.Json\lib\net45\FsPickler.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5')">
+      <ItemGroup>
+        <Reference Include="MySql.Data">
+          <HintPath>..\packages\MySql.Data\lib\net20\MySql.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0')">
+      <ItemGroup>
+        <Reference Include="MySql.Data">
+          <HintPath>..\packages\MySql.Data\lib\net40\MySql.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
+      <ItemGroup>
+        <Reference Include="MySql.Data">
+          <HintPath>..\packages\MySql.Data\lib\net45\MySql.Data.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -240,13 +270,8 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0')">
       <ItemGroup>
-        <Reference Include="Mono.Data.Sqlite">
-          <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono\lib\net40\Mono.Data.Sqlite.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="ServiceStack.OrmLite.Sqlite">
-          <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono\lib\net40\ServiceStack.OrmLite.Sqlite.dll</HintPath>
+        <Reference Include="ServiceStack.OrmLite.MySql">
+          <HintPath>..\packages\ServiceStack.OrmLite.MySql\lib\net40\ServiceStack.OrmLite.MySql.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -254,13 +279,8 @@
     </When>
     <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
       <ItemGroup>
-        <Reference Include="Mono.Data.Sqlite">
-          <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono\lib\net45\Mono.Data.Sqlite.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="ServiceStack.OrmLite.Sqlite">
-          <HintPath>..\packages\ServiceStack.OrmLite.Sqlite.Mono\lib\net45\ServiceStack.OrmLite.Sqlite.dll</HintPath>
+        <Reference Include="ServiceStack.OrmLite.MySql">
+          <HintPath>..\packages\ServiceStack.OrmLite.MySql\lib\net45\ServiceStack.OrmLite.MySql.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

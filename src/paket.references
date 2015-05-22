@@ -3,4 +3,4 @@ FsPickler
 FsPickler.Json
 FSharp.Data
 ServiceStack.OrmLite
-ServiceStack.OrmLite.Sqlite.Mono
+ServiceStack.OrmLite.MySql

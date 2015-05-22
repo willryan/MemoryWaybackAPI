@@ -5,11 +5,12 @@ nuget FsPickler
 nuget FsPickler.Json
 nuget FSharp.Data
 nuget ServiceStack.OrmLite
-nuget ServiceStack.OrmLite.Sqlite.Mono
+nuget ServiceStack.OrmLite.MySql
 
 nuget NUnit
 nuget NUnit.Runners
 nuget FsUnit
 nuget canopy
+nuget Foq
 
 nuget Fake

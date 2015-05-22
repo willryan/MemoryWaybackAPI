@@ -1,3 +1,9 @@
-FSharp.Core
+Suave
+FsPickler
+FsPickler.Json
+FSharp.Data
+ServiceStack.OrmLite
+ServiceStack.OrmLite.MySql
 NUnit
 FsUnit
+Foq

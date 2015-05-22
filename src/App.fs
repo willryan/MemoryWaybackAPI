@@ -16,7 +16,8 @@ open System.IO
 open System.Text
 open Nessos.FsPickler
 open Nessos.FsPickler.Json
-open MemoryWayback.Media
+open MemoryWayback.Types
+open MemoryWayback.MediaQuery
 
 //let logger = Loggers.sane_defaults_for Debug
 
