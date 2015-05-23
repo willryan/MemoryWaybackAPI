@@ -6,7 +6,7 @@ open MemoryWayback.DbTypes
 type Query = {
   From : DateTime
   To : DateTime
-  Types : string list
+  Types : MediaType list
 }
 
 type Result = {

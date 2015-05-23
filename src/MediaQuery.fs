@@ -6,24 +6,28 @@ open MemoryWayback.Types
 open ServiceStack.OrmLite
 
 module Internal =
-  let findDbMedias q =
-    Connection.Select<medias>(fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To)
-    |> List.ofSeq
+  let findMedias q =
 
-  let dbToCodeType (m:medias) =
-    {
-      Media.Id = m.Id
-      Type = m.Type
-      Taken = m.Taken
-      Url = m.Url
-    }
+    let findDbMedias q =
+      Connection.Select<medias>(fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To)
+      |> List.ofSeq
 
-  let findMedias dbFinder mapper q =
-    dbFinder q
-    |> List.map mapper
+    let dbToCodeType (m:medias) =
+      {
+        Media.Id = m.Id
+        Type = m.Type
+        Taken = m.Taken
+        Url = m.Url
+      }
 
-  let mediasToResults q ms =
-    let dateGrps =
+    q
+    |> findDbMedias
+    |> List.map dbToCodeType
+
+
+  let getResults dbFinder q =
+
+    let mediasToResults ms =
       ms
       |> Seq.groupBy (fun r -> r.Taken)
       |> Seq.map (fun (d,rs) ->
@@ -43,13 +47,9 @@ module Internal =
       |> Seq.toList
     {
       Query = q
-      Results = dateGrps
+      Results = mediasToResults <| dbFinder q
     }
 
-  let findMedia dbFinder resFinder mediaMapper resMapper q =
-    resFinder dbFinder mediaMapper q
-    |> resMapper q
 
-
-let findMedia : (Query -> Results) =
-  Internal.findMedia Internal.findDbMedias Internal.findMedias Internal.dbToCodeType Internal.mediasToResults
+let getResults : (Query -> Results) =
+  Internal.getResults Internal.findMedias

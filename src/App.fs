@@ -11,11 +11,13 @@ open Suave.Http.Files
 open Suave.Http.Successful
 open Suave.Http.RequestErrors
 open Suave.Types
+open Suave.Utils
 open Suave.Log
 open System.IO
 open System.Text
 open Nessos.FsPickler
 open Nessos.FsPickler.Json
+open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
 
@@ -24,21 +26,23 @@ open MemoryWayback.MediaQuery
 let pickler = FsPickler.CreateJson(indent = true, omitHeader = true)
 
 let okJson o =
-  OK (pickler.PickleToString o) 
+  OK (pickler.PickleToString o)
   >>= Writers.setMimeType "application/json"
 
 let handleQuery ctx =
   printfn "%A" ctx.request.query
-  let fromValue = defaultArg (ctx.request.queryParam "from") ""
-  let toValue = defaultArg (ctx.request.queryParam "to") ""
-  let types = defaultArg (ctx.request.queryParam "types") ""
+  let fromValue = Choice.orDefault "" (ctx.request.queryParam "from")
+  let toValue = Choice.orDefault "" (ctx.request.queryParam "to")
+  let types = Choice.orDefault "" (ctx.request.queryParam "types")
   printfn "%s - %s : %s" fromValue toValue types
   let o = {
     From = DateTime.Parse fromValue
     To = DateTime.Parse toValue
-    Types = Array.toList (types.Split ',')
+    Types = (types.Split ',')
+      |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
+      |> Array.toList
   }
-  (okJson <| findMedia o) ctx
+  (okJson <| getResults o) ctx
 
 let app =
   choose

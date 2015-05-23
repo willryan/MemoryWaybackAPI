@@ -1,6 +1,9 @@
 #r @"./packages/FAKE/tools/FakeLib.dll"
 
 open Fake
+open Fake.EnvironmentHelper
+
+monoArguments <- "--debug"
 
 Target "build_all" (fun _ ->
   MSBuildDebug "" "Build" [ "MemoryWayback.fsproj" ]
@@ -9,6 +12,11 @@ Target "build_all" (fun _ ->
 
 Target "build_src" (fun _ ->
   MSBuildDebug "" "Build" [ "src/MemoryWayback.App.fsproj" ]
+  |> Log "TestBuild-Output: "
+)
+
+Target "build_test" (fun _ ->
+  MSBuildDebug "" "Build" [ "test/MemoryWayback.Tests.fsproj" ]
   |> Log "TestBuild-Output: "
 )
 
