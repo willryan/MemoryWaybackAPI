@@ -13,9 +13,9 @@ open Foq
 
 let mockSelect<'dbType> (allValues:'dbType list) =
   let callback (q:Expression<Func<'dbType,bool>>) =
-    let filtered = 
+    let filtered =
       allValues
-      |> List.filter (fun m -> 
+      |> List.filter (fun m ->
         let compiled = q.Compile()
         compiled.Invoke(m)
       )
@@ -29,35 +29,35 @@ type ``media queries`` ()=
 
   let mutable mockConn = Mock<IDbConnection>()
   let mutable oldConn : IDbConnection = null
-  let makeDbPhoto id taken = 
+  let makeDbPhoto id taken =
     {
       medias.Id = id
       Type = MediaType.Photo
       Taken = taken
       Url = sprintf "/photo/foo_%d.jpg" id
     }
-  let makeDbVideo id taken = 
+  let makeDbVideo id taken =
     {
       medias.Id = id
       Type = MediaType.Video
       Taken = taken
       Url = sprintf "/video/bar_%d.jpg" id
     }
-  let makePhoto id taken = 
+  let makePhoto id taken =
     {
       Media.Id = id
       Type = MediaType.Photo
       Taken = taken
       Url = sprintf "/photo/foo_%d.jpg" id
     }
-  let makeVideo id taken = 
+  let makeVideo id taken =
     {
       Media.Id = id
       Type = MediaType.Video
       Taken = taken
       Url = sprintf "/video/bar_%d.jpg" id
     }
-  let daysAgo (num:int) = 
+  let daysAgo (num:int) =
     DateTime.Now - TimeSpan.FromDays(float num)
 
   let dbMedias = [

@@ -9,8 +9,7 @@ module Internal =
   let findMedias q =
 
     let findDbMedias q =
-      Connection.Select<medias>(fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To)
-      |> List.ofSeq
+      DbSelect<medias>(<@ fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To @>)
 
     let dbToCodeType (m:medias) =
       {

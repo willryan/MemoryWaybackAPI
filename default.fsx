@@ -29,7 +29,7 @@ Target "test" (fun _ ->
        OutputFile = "test/TestResults.xml"})
 )
 
-"build_all" ==> "test"
+"build_test" ==> "test"
 
 let runApp args =
   let appExe = "src/bin/Debug/MemoryWayback.exe"
