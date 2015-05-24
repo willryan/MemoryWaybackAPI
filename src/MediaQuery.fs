@@ -1,15 +1,17 @@
 module MemoryWayback.MediaQuery
 
 open System
+open MemoryWayback.Persistence
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open ServiceStack.OrmLite
+open ExtCore.Control
 
 module Internal =
-  let findMedias q =
+  let findDbMedias q (p:IPersistence) =
+    p.Select<medias>(<@ fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To @>)
 
-    let findDbMedias q =
-      DbSelect<medias>(<@ fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To @>)
+  let findMedias q =
 
     let dbToCodeType (m:medias) =
       {
@@ -19,9 +21,10 @@ module Internal =
         Url = m.Url
       }
 
-    q
-    |> findDbMedias
-    |> List.map dbToCodeType
+    state {
+      let! res = findDbMedias q
+      return List.map dbToCodeType res
+    }
 
 
   let getResults dbFinder q =
@@ -44,11 +47,16 @@ module Internal =
           |> Seq.toList
       })
       |> Seq.toList
-    {
-      Query = q
-      Results = mediasToResults <| dbFinder q
+
+    state {
+      let! medias = dbFinder q
+      return {
+        Query = q
+        Results = mediasToResults medias
+      }
     }
 
 
-let getResults : (Query -> Results) =
+let getResults : (Query -> StateFunc<IPersistence,Results>) =
   Internal.getResults Internal.findMedias
+

@@ -1,5 +1,7 @@
 source https://nuget.org/api/v2
 
+nuget ExtCore
+nuget FSharp.Quotations.Evaluator
 nuget Suave
 nuget FsPickler
 nuget FsPickler.Json

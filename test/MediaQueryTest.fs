@@ -1,4 +1,4 @@
-module MemoryWayback.MeddiaQueryTest
+module MemoryWayback.Tests.MediaQueryTest
 
 open NUnit.Framework
 open FsUnit
@@ -10,25 +10,12 @@ open System
 open System.Linq.Expressions
 open ServiceStack.OrmLite
 open Foq
+open MemoryWayback.Tests.MemoryPersistence
 
-let mockSelect<'dbType> (allValues:'dbType list) =
-  let callback (q:Expression<Func<'dbType,bool>>) =
-    let filtered =
-      allValues
-      |> List.filter (fun m ->
-        let compiled = q.Compile()
-        compiled.Invoke(m)
-      )
-    new Collections.Generic.List<'dbType>(filtered)
-  Mock<IDbConnection>()
-    .Setup(fun c -> <@ c.Select<'dbType>(It.IsAny<Expression<Func<'dbType,bool>>>()) @>)
-    .Calls<Expression<Func<'dbType,bool>>>(callback).Create()
 
 [<TestFixture>]
 type ``media queries`` ()=
 
-  let mutable mockConn = Mock<IDbConnection>()
-  let mutable oldConn : IDbConnection = null
   let makeDbPhoto id taken =
     {
       medias.Id = id
@@ -73,56 +60,48 @@ type ``media queries`` ()=
       makeVideo 4 (daysAgo 12)
     |]
 
-  [<SetUp>]
-  member x.Setup ()=
-    oldConn <- Connection
-
-  [<TearDown>]
-  member x.TearDown ()=
-    Connection <- oldConn
+  let persistence = 
+    MemoryPersistence(List.map (fun m -> m :> obj) dbMedias)
+    
 
   [<Test>]
   member x.``findMedias hits db and transfers into fsharp type`` ()=
-    Connection <- mockSelect dbMedias
     let q = {
       From = daysAgo 100
       To = daysAgo 1
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
-    Internal.findMedias q
+    fst (Internal.findMedias q persistence)
     |> should equal medias
 
   [<Test>]
   member x.``findMedias filters too old`` ()=
-    Connection <- mockSelect dbMedias
     let q = {
       From = daysAgo 8
       To = daysAgo 1
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
-    Internal.findMedias q
+    fst (Internal.findMedias q persistence)
     |> should equal [| medias.[0] ; medias.[2] |]
 
   [<Test>]
   member x.``findMedias filters too new`` ()=
-    Connection <- mockSelect dbMedias
     let q = {
       From = daysAgo 18
       To = daysAgo 4
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
-    Internal.findMedias q
+    fst (Internal.findMedias q persistence)
     |> should equal [| medias.[1] ; medias.[2] ; medias.[3] |]
 
   [<Test>]
   member x.``findMedias filters type`` ()=
-    Connection <- mockSelect dbMedias
     let q = {
       From = daysAgo 18
       To = daysAgo 0
       Types = [ MediaType.Video ]
     }
-    Internal.findMedias q
+    fst (Internal.findMedias q persistence)
     |> should equal [| medias.[2] ; medias.[3] |]
 
   [<Test>]

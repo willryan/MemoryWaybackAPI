@@ -6,11 +6,13 @@ NUGET
       Selenium.Support (2.45.0)
       Selenium.WebDriver (2.45.0)
       SizSelCsZzz (0.3.36.0)
+    ExtCore (0.8.45)
     FAKE (3.33.0)
     Foq (1.7)
     FSharp.Core (3.1.2.1)
     FSharp.Data (2.2.2)
       Zlib.Portable (>= 1.10.0) - framework: portable-net40+sl50+wp80+win80
+    FSharp.Quotations.Evaluator (1.0.6)
     FsPickler (1.2.2)
     FsPickler.Json (1.2.2)
       FsPickler (1.2.2)
@@ -41,4 +43,4 @@ NUGET
     Suave (0.28.1)
       FSharp.Core (>= 3.1.2.1)
       FsPickler (>= 1.0.7)
-    Zlib.Portable (1.10.0) - framework: portable-net40+sl50+wp80+win80
+    Zlib.Portable (1.10.0)

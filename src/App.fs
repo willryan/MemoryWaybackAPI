@@ -20,10 +20,19 @@ open Nessos.FsPickler.Json
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
+open MemoryWayback.Persistence
+open MemoryWayback.OrmlitePersistence
 
 //let logger = Loggers.sane_defaults_for Debug
 
 let pickler = FsPickler.CreateJson(indent = true, omitHeader = true)
+
+let mutable Persistence : IPersistence = OrmlitePersistence() :> IPersistence
+
+let persist stateFunc =
+  let (res,p) = stateFunc Persistence
+  Persistence <- p
+  res
 
 let okJson o =
   OK (pickler.PickleToString o)
@@ -42,7 +51,7 @@ let handleQuery ctx =
       |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
       |> Array.toList
   }
-  (okJson <| getResults o) ctx
+  (okJson <| persist (getResults o)) ctx
 
 let app =
   choose
