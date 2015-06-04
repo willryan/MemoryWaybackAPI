@@ -58,4 +58,20 @@ Target "spec" (fun _ ->
   if result <> 0 then failwith "Failed result from canopy tests"
 )
 
+let prompt () = 
+  System.Console.ForegroundColor <- System.ConsoleColor.Magenta
+  printf "\nfake> " 
+  System.Console.ForegroundColor <- System.ConsoleColor.White
+  System.Console.ReadLine()
+
+Target "shell" (fun _ ->
+  let mutable line = prompt()
+  while (line <> "quit") do
+    try
+      run line
+    with
+      | ex -> printfn "%A" ex
+    line <- prompt()
+)
+
 RunTargetOrDefault "build"
