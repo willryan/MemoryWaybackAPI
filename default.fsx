@@ -25,6 +25,7 @@ Target "test" (fun _ ->
   testDlls
   |> NUnit (fun p ->
     {p with
+       ErrorLevel = DontFailBuild
        DisableShadowCopy = true;
        OutputFile = "test/TestResults.xml"})
 )
@@ -68,7 +69,7 @@ Target "shell" (fun _ ->
   let mutable line = prompt()
   while (line <> "quit") do
     try
-      run line
+      runSingleTarget <| getTarget line
     with
       | ex -> printfn "%A" ex
     line <- prompt()
