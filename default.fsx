@@ -25,7 +25,7 @@ Target "test" (fun _ ->
   testDlls
   |> NUnit (fun p ->
     {p with
-       ErrorLevel = DontFailBuild
+       //ErrorLevel = DontFailBuild
        DisableShadowCopy = true;
        OutputFile = "test/TestResults.xml"})
 )
@@ -73,6 +73,7 @@ Target "shell" (fun _ ->
     with
       | ex -> printfn "%A" ex
     line <- prompt()
+  exit 0
 )
 
 RunTargetOrDefault "build"

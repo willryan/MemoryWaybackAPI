@@ -9,21 +9,26 @@ type Query = {
   Types : MediaType list
 }
 
-type Result = {
-  Date: DateTime
-  Photos: string list
-  Videos: string list
-}
+type Result =
+  {
+    Date: DateTime
+    Photos: string list
+    Videos: string list
+  }
+  override x.ToString () : string =
+    sprintf "%A" x
 
 type Results = {
   Query : Query
   Results: Result list
 }
 
-type Media = {
-  Id : int
-  Type : MediaType
-  Taken : DateTime
-  Url : string
-}
-
+type Media =
+  {
+    Id : int
+    Type : MediaType
+    Taken : DateTime
+    Url : string
+  }
+  override x.ToString () : string =
+    sprintf "%A" x

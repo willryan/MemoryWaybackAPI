@@ -9,7 +9,9 @@ open ExtCore.Control
 
 module Internal =
   let findDbMedias q (p:IPersistence) =
-    p.Select<medias>(<@ fun (m:medias) -> q.From <= m.Taken && m.Taken <= q.To @>)
+    p.Select<medias>(<@ fun (m:medias) ->
+      q.From <= m.Taken && m.Taken <= q.To && (List.contains m.Type q.Types)
+    @>)
 
   let findMedias q =
 
@@ -25,7 +27,6 @@ module Internal =
       let! res = findDbMedias q
       return List.map dbToCodeType res
     }
-
 
   let getResults dbFinder q =
 
@@ -46,6 +47,7 @@ module Internal =
           |> Seq.map (fun r -> r.Url)
           |> Seq.toList
       })
+      |> Seq.sortBy (fun r -> r.Date)
       |> Seq.toList
 
     state {
@@ -59,4 +61,3 @@ module Internal =
 
 let getResults : (Query -> StateFunc<IPersistence,Results>) =
   Internal.getResults Internal.findMedias
-

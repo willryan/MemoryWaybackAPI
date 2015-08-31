@@ -25,7 +25,7 @@ open MemoryWayback.OrmlitePersistence
 
 //let logger = Loggers.sane_defaults_for Debug
 
-let pickler = FsPickler.CreateJson(indent = true, omitHeader = true)
+let pickler = FsPickler.CreateJsonSerializer(indent = true, omitHeader = true)
 
 let mutable Persistence : IPersistence = OrmlitePersistence() :> IPersistence
 
@@ -71,4 +71,3 @@ let start (args : string[]) =
   match realArgs.[0] with
   | "server" -> startApp()
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1
-

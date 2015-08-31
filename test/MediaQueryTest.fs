@@ -10,12 +10,13 @@ open System
 open System.Linq.Expressions
 open ServiceStack.OrmLite
 open Foq
+open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
 
 
 [<TestFixture>]
 type ``media queries`` ()=
-
+  let now = DateTime.Now
   let makeDbPhoto id taken =
     {
       medias.Id = id
@@ -45,7 +46,7 @@ type ``media queries`` ()=
       Url = sprintf "/video/bar_%d.jpg" id
     }
   let daysAgo (num:int) =
-    DateTime.Now - TimeSpan.FromDays(float num)
+    now - TimeSpan.FromDays(float num)
 
   let dbMedias = [
       makeDbPhoto 1 (daysAgo 3)
@@ -60,9 +61,9 @@ type ``media queries`` ()=
       makeVideo 4 (daysAgo 12)
     |]
 
-  let persistence = 
+  let persistence =
     MemoryPersistence(List.map (fun m -> m :> obj) dbMedias)
-    
+
 
   [<Test>]
   member x.``findMedias hits db and transfers into fsharp type`` ()=
@@ -82,7 +83,7 @@ type ``media queries`` ()=
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
     fst (Internal.findMedias q persistence)
-    |> should equal [| medias.[0] ; medias.[2] |]
+    |> should equal [ medias.[0] ; medias.[2] ]
 
   [<Test>]
   member x.``findMedias filters too new`` ()=
@@ -92,7 +93,7 @@ type ``media queries`` ()=
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
     fst (Internal.findMedias q persistence)
-    |> should equal [| medias.[1] ; medias.[2] ; medias.[3] |]
+    |> should equal [ medias.[1] ; medias.[2] ; medias.[3] ]
 
   [<Test>]
   member x.``findMedias filters type`` ()=
@@ -102,10 +103,42 @@ type ``media queries`` ()=
       Types = [ MediaType.Video ]
     }
     fst (Internal.findMedias q persistence)
-    |> should equal [| medias.[2] ; medias.[3] |]
+    |> should equal [ medias.[2] ; medias.[3] ]
 
   [<Test>]
   member x.``getResults transforms medias into results`` ()=
-    2 + 2
-    |> should equal 5
-
+    let medias = [|
+        makePhoto 1 (daysAgo 3)
+        makePhoto 2 (daysAgo 1)
+        makeVideo 3 (daysAgo 3)
+        makeVideo 4 (daysAgo 2)
+        makeVideo 5 (daysAgo 2)
+      |]
+    let query = {
+      From = daysAgo 18
+      To = daysAgo 0
+      Types = [ MediaType.Video ]
+    }
+    let dbFinderFake (q:Query) (p:IPersistence) : (seq<Media> * IPersistence) =
+      if (q = query && p = (persistence :> IPersistence)) then
+        Array.toSeq medias, p
+      else
+        Seq.empty, p
+    let output = Internal.getResults dbFinderFake query (persistence :> IPersistence)
+    let results = Seq.toArray (fst output).Results
+    Array.length results |> should equal 3
+    results.[0] |> should equal {
+      Date = daysAgo 3
+      Photos = [medias.[0].Url]
+      Videos = [medias.[2].Url]
+    }
+    results.[1] |> should equal {
+      Date = daysAgo 2
+      Photos = []
+      Videos = [medias.[3].Url ; medias.[4].Url]
+    }
+    results.[2] |> should equal {
+      Date = daysAgo 1
+      Photos = [medias.[1].Url]
+      Videos = []
+    }
