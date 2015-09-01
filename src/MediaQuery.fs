@@ -8,10 +8,13 @@ open ServiceStack.OrmLite
 open ExtCore.Control
 
 module Internal =
-  let findDbMedias q (p:IPersistence) =
-    p.Select<medias>(<@ fun (m:medias) ->
-      q.From <= m.Taken && m.Taken <= q.To && (List.contains m.Type q.Types)
-    @>)
+  let findDbMedias (q:Query) (p:IPersistence) =
+    let res, p2 = p.Select<medias>(<@ fun (m:medias) ->
+      q.From <= m.Taken && m.Taken <= q.To @>)
+    let res2 = res |> List.filter (fun (m:medias) ->
+      List.contains m.Type q.Types)
+    res2, p2
+  //&& (List.contains m.Type q.Types)
 
   let findMedias q =
 

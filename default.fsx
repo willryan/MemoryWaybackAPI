@@ -5,6 +5,11 @@ open Fake.EnvironmentHelper
 
 monoArguments <- "--debug"
 
+Target "clean_all" (fun _ ->
+  MSBuildDebug "" "Clean" [ "MemoryWayback.fsproj" ]
+  |> Log "TestBuild-Output: "
+)
+
 Target "build_all" (fun _ ->
   MSBuildDebug "" "Build" [ "MemoryWayback.fsproj" ]
   |> Log "TestBuild-Output: "
@@ -59,9 +64,9 @@ Target "spec" (fun _ ->
   if result <> 0 then failwith "Failed result from canopy tests"
 )
 
-let prompt () = 
+let prompt () =
   System.Console.ForegroundColor <- System.ConsoleColor.Magenta
-  printf "\nfake> " 
+  printf "\nfake> "
   System.Console.ForegroundColor <- System.ConsoleColor.White
   System.Console.ReadLine()
 

@@ -40,7 +40,7 @@ NUGET
       Newtonsoft.Json (>= 6.0)
       Selenium.Support (>= 2.40)
       Selenium.WebDriver (>= 2.40)
-    Suave (0.31.1)
-      FSharp.Core (>= 4.0.0.1)
+    Suave (0.30.0)
+      FSharp.Core (>= 3.1.2.1)
       FsPickler (>= 1.2.5)
-    Zlib.Portable (1.11.0) - framework: portable-net40+sl50+wp80+win80
+    Zlib.Portable (1.11.0)

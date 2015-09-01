@@ -43,13 +43,18 @@ let handleQuery ctx =
   let fromValue = Choice.orDefault "" (ctx.request.queryParam "from")
   let toValue = Choice.orDefault "" (ctx.request.queryParam "to")
   let types = Choice.orDefault "" (ctx.request.queryParam "types")
-  printfn "%s - %s : %s" fromValue toValue types
+  //printfn "%s - %s : %s" fromValue toValue types
+  let fromDt = DateTime.Parse fromValue
+  let toDt = DateTime.Parse toValue
+  let typeEnums =
+    (types.Split ',')
+    |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
+    |> Array.toList
+  //printfn "%A - %A : %A" fromDt toDt typeEnums
   let o = {
-    From = DateTime.Parse fromValue
-    To = DateTime.Parse toValue
-    Types = (types.Split ',')
-      |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
-      |> Array.toList
+    Query.From = fromDt
+    To = toDt
+    Types = typeEnums
   }
   (okJson <| persist (getResults o)) ctx
 
