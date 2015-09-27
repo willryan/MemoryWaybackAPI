@@ -19,10 +19,18 @@ NUGET
       Newtonsoft.Json (>= 6.0.5)
     FsUnit (1.3.1.0)
       NUnit (2.6.4)
+    Microsoft.Bcl (1.1.10)
+      Microsoft.Bcl.Build (>= 1.0.14)
+    Microsoft.Bcl.Build (1.0.21)
+    Microsoft.Net.Http (2.2.29)
+      Microsoft.Bcl (>= 1.1.10)
+      Microsoft.Bcl.Build (>= 1.0.14)
     MySql.Data (6.9.7)
     Newtonsoft.Json (7.0.1)
     NUnit (2.6.4)
     NUnit.Runners (2.6.4)
+    Octokit (0.16.0)
+      Microsoft.Net.Http
     Selenium.Support (2.47.0)
       Selenium.WebDriver (>= 2.47.0)
     Selenium.WebDriver (2.47.0)
@@ -40,7 +48,13 @@ NUGET
       Newtonsoft.Json (>= 6.0)
       Selenium.Support (>= 2.40)
       Selenium.WebDriver (>= 2.40)
+    SourceLink.Fake (1.1.0)
     Suave (0.30.0)
       FSharp.Core (>= 3.1.2.1)
       FsPickler (>= 1.2.5)
     Zlib.Portable (1.11.0)
+GITHUB
+  remote: fsharp/FAKE
+  specs:
+    modules/Octokit/Octokit.fsx (448a0e59aa1381714d045bf81c3ab5692aad6259)
+      Octokit

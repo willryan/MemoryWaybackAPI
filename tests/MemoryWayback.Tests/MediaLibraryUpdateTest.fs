@@ -35,8 +35,5 @@ type ``media library updater`` ()=
     let dbCleaner = function
       | p when p = p3 -> p4
       | _ -> raiseNoMatch()
-    let outP = Internal.updateMedia dirFileFinder dbCleaner "." p1
+    let outP = Internal.updateMedia dirFileFinder fileHandler dbCleaner "." p1
     outP |> should equal p4
-
-
-

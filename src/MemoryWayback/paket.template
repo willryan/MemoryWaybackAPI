@@ -1,0 +1,23 @@
+type project
+owners
+    Will Pleasant-Ryan
+authors 
+    Will Pleasant-Ryan
+projectUrl
+    http://github.com/willryan/MemoryWayback
+iconUrl
+    https://raw.githubusercontent.com/willryan/MemoryWayback/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/willryan/MemoryWayback/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    
+summary
+    browse through old memories (photos, videos)
+description
+    Description not set
+
+

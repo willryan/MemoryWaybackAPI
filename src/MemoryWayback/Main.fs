@@ -1,3 +1,5 @@
+module MemoryWayback.Main
+
 open System
 open MemoryWayback
 
