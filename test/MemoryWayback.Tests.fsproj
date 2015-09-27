@@ -11,6 +11,7 @@
       <BuildOrder>
         <String>MemoryPersistence.fs</String>
         <String>MediaQueryTest.fs</String>
+        <String>MediaLibraryUpdateTest.fs</String>
       </BuildOrder>
     </BuildOrder>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
@@ -52,6 +53,7 @@
   <ItemGroup>
     <Compile Include="MemoryPersistence.fs" />
     <Compile Include="MediaQueryTest.fs" />
+    <Compile Include="MediaLibraryUpdateTest.fs" />
   </ItemGroup>
   <PropertyGroup>
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>

@@ -5,6 +5,12 @@ open Fake.EnvironmentHelper
 
 monoArguments <- "--debug"
 
+MSBuildDefaults <- {
+  MSBuildDefaults with Verbosity = Some Quiet
+}
+
+enableProcessTracing <- false
+
 Target "clean_all" (fun _ ->
   MSBuildDebug "" "Clean" [ "MemoryWayback.fsproj" ]
   |> Log "TestBuild-Output: "
