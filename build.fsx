@@ -16,6 +16,12 @@ open System.IO
 open SourceLink
 #endif
 
+monoArguments <- "--debug"
+
+MSBuildDefaults <- {
+  MSBuildDefaults with Verbosity = Some Quiet
+}
+
 // --------------------------------------------------------------------------------------
 // START TODO: Provide project-specific details below
 // --------------------------------------------------------------------------------------
