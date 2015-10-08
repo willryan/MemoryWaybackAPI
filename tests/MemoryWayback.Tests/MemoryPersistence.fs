@@ -5,11 +5,12 @@ open Microsoft.FSharp.Quotations
 open FSharp.Quotations.Evaluator
 
 type MemoryPersistence(s:obj list) =
+  let mutable nextId = 1
   let set = s
   interface IPersistence with
     member x.Select<'dbType> (e:Expr<'dbType -> bool>) =
       let evalF = (QuotationEvaluator.Evaluate<'dbType -> bool> e)
-      let res = 
+      let res =
         set
         |> List.filter (fun o -> o :? 'dbType)
         |> List.map (fun o -> o :?> 'dbType)
@@ -23,4 +24,3 @@ type MemoryPersistence(s:obj list) =
     member x.Delete<'dbType> (r:'dbType) =
       let p2 = MemoryPersistence(List.filter (fun x -> x <> (r :> obj)) set)
       (true , p2 :> IPersistence)
-

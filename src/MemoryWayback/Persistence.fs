@@ -11,4 +11,3 @@ type IPersistence =
   abstract Update : 'dbType -> 'dbType * IPersistence
   abstract Insert : 'dbType -> 'dbType * IPersistence
   abstract Delete : 'dbType -> bool * IPersistence
-

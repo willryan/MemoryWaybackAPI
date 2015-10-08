@@ -22,6 +22,7 @@ type ``media queries`` ()=
       medias.Id = id
       Type = MediaType.Photo
       Taken = taken
+      Added = taken
       Url = sprintf "/photo/foo_%d.jpg" id
     }
   let makeDbVideo id taken =
@@ -29,6 +30,7 @@ type ``media queries`` ()=
       medias.Id = id
       Type = MediaType.Video
       Taken = taken
+      Added = taken
       Url = sprintf "/video/bar_%d.jpg" id
     }
   let makePhoto id taken =

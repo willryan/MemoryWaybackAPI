@@ -16,6 +16,6 @@ type medias = {
   mutable Id : int
   mutable Url : string
   mutable Taken : DateTime
+  mutable Added : DateTime
   mutable Type : MediaType
 }
-
