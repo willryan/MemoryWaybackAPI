@@ -22,6 +22,14 @@ MSBuildDefaults <- {
   MSBuildDefaults with Verbosity = Some Quiet
 }
 
+type BuildConfig =
+  | Debug
+  | Release
+
+let cfgToStr = function
+  | Debug -> "Debug"
+  | Release -> "Release"
+
 // --------------------------------------------------------------------------------------
 // START TODO: Provide project-specific details below
 // --------------------------------------------------------------------------------------
@@ -54,7 +62,7 @@ let tags = ""
 let solutionFile  = "MemoryWayback.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
+let testAssemblies = sprintf "tests/**/bin/%s/*Tests*.dll"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
@@ -109,13 +117,20 @@ Target "AssemblyInfo" (fun _ ->
         )
 )
 
+let copyBinaries mode =
+    let loc = sprintf "bin/%s" <| cfgToStr mode
+    !! "src/**/*.??proj"
+    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ loc, "bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+    |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 // Copies binaries from default VS location to expected bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
-    !! "src/**/*.??proj"
-    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
-    |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
+    copyBinaries Release
+)
+
+Target "CopyBinariesDebug" (fun _ ->
+    copyBinaries Debug
 )
 
 // --------------------------------------------------------------------------------------
@@ -131,29 +146,48 @@ Target "CleanDocs" (fun _ ->
 
 // --------------------------------------------------------------------------------------
 // Build library & test project
+let build mode target =
+  let buildF =
+    match mode with
+    | Debug -> MSBuildDebug
+    | Release -> MSBuildRelease
+  !! solutionFile
+  |> buildF "" target
+  |> ignore
 
-Target "Build" (fun _ ->
-    !! solutionFile
-    |> MSBuildRelease "" "Rebuild"
-    |> ignore
+Target "BuildRelease" (fun _ ->
+  build Release "Build"
+)
+
+Target "RebuildRelease" (fun _ ->
+  build Release "Rebuild"
 )
 
 Target "BuildDebug" (fun _ ->
-    !! solutionFile
-    |> MSBuildDebug "" "Rebuild"
-    |> ignore
+  build Debug "Build"
+)
+
+Target "RebuildDebug" (fun _ ->
+  build Debug "Rebuild"
 )
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
-Target "RunTests" (fun _ ->
-    !! testAssemblies
-    |> NUnit (fun p ->
-        { p with
-            DisableShadowCopy = true
-            TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+let runTests mode =
+  !! (testAssemblies <| cfgToStr mode)
+  |> NUnit (fun p ->
+      { p with
+          DisableShadowCopy = true
+          TimeOut = TimeSpan.FromMinutes 20.
+          OutputFile = "TestResults.xml" })
+
+Target "RunTestsRelease" (fun _ ->
+  runTests Release
+)
+
+Target "RunTestsDebug" (fun _ ->
+  runTests Release
 )
 
 #if MONO
@@ -348,9 +382,9 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "Build"
+  ==> "RebuildRelease"
   ==> "CopyBinaries"
-  ==> "RunTests"
+  ==> "RunTestsRelease"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
   ==> "All"
