@@ -27,7 +27,7 @@ let mediasId =
   }
 
 type MemoryPersistence(s:obj list, idF : DbIdentity) =
-  let mutable nextId = 1
+  let mutable nextId = 0
   let set = s
   interface IPersistence with
     member x.Select<'dbType> (e:Expr<'dbType -> bool>) =
@@ -45,7 +45,13 @@ type MemoryPersistence(s:obj list, idF : DbIdentity) =
       )
       (MemoryPersistence(without, idF) :> IPersistence).Insert r
     member x.Insert<'dbType> (r:'dbType) =
-      (r , MemoryPersistence(r :> obj :: set, idF) :> IPersistence)
+      let useR =
+        match idF.GetId (r :> obj) with
+        | -1 ->
+          nextId <- nextId + 1
+          idF.SetId (r :> obj) nextId
+        | _ -> r :> obj
+      (useR :?> 'dbType , MemoryPersistence(useR :: set, idF) :> IPersistence)
     member x.Delete<'dbType> (r:'dbType) =
       let p2 = MemoryPersistence(List.filter (fun x -> x <> (r :> obj)) set, idF)
       (true , p2 :> IPersistence)

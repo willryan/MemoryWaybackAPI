@@ -87,16 +87,17 @@ type ``media library updater`` ()=
     let p1 = MemoryPersistence(set, mediasId) :> IPersistence
     let newGuy =
       {
-        Id = 1
+        Id = -1
         Type = MediaType.Photo
         Taken = tNew
         Added = tNew
-        Url = "/foo/bar.jpg"
+        Url = "/bar/baz.jpg"
       }
     let _,outP = Internal.itemUpdate newGuy [] p1
     // yuck, also points out need to give new id
-    let updated,_ = outP.Select(<@ fun (m:medias) -> m.Id = -1 @>)
+    let updated,_ = outP.Select(<@ fun (m:medias) -> m.Url = "/bar/baz.jpg" @>)
     let recd = List.head updated
+    newGuy.Id <- recd.Id
     recd |> should equal newGuy
 
   [<Test>]
