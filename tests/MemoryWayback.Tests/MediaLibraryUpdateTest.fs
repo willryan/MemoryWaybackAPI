@@ -23,10 +23,10 @@ type ``media library updater`` ()=
   member x.``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
     let dirFileFinder dir = [dir + "/alpha.mov" ; dir + "/beta.jpg" ]
 
-    let p1 = MemoryPersistence([]) :> IPersistence
-    let p2 = MemoryPersistence([]) :> IPersistence
-    let p3 = MemoryPersistence([]) :> IPersistence
-    let p4 = MemoryPersistence([]) :> IPersistence
+    let p1 = MemoryPersistence([], mediasId) :> IPersistence
+    let p2 = MemoryPersistence([], mediasId) :> IPersistence
+    let p3 = MemoryPersistence([], mediasId) :> IPersistence
+    let p4 = MemoryPersistence([], mediasId) :> IPersistence
     let fileHandler t fileName (p:IPersistence) =
       match fileName,p with
       | "./alpha.mov",p when p = p1 -> p2
@@ -39,12 +39,65 @@ type ``media library updater`` ()=
     outP |> should equal p4
 
   [<Test>]
-  member x.``itemUpdate creates new entries``() =
-    2 + 2 |> should equal 4
+  member x.``itemUpdate updates existing entries``() =
+    let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
+    let tNew = DateTime.UtcNow
+    let existing =
+      [
+         {
+           Id = 1
+           Type = MediaType.Photo
+           Taken = tOld
+           Added = tOld
+           Url = "/foo/bar.jpg"
+         }
+      ]
+    let set = existing |> List.map (fun e -> e :> obj)
+
+    let p1 = MemoryPersistence(set, mediasId) :> IPersistence
+    let newGuy =
+      {
+        Id = 1
+        Type = MediaType.Photo
+        Taken = tNew
+        Added = tNew
+        Url = "/foo/bar.jpg"
+      }
+    let _,outP = Internal.itemUpdate newGuy existing p1
+    let updated,_ = outP.Select(<@ fun (m:medias) -> m.Id = 1 @>)
+    let recd = List.head updated
+    recd |> should equal newGuy
 
   [<Test>]
-  member x.``itemUpdate updates existing entries``() =
-    2 + 2 |> should equal 4
+  member x.``itemUpdate creates new entries``() =
+    let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
+    let tNew = DateTime.UtcNow
+    let existing =
+      [
+         {
+           Id = 2
+           Type = MediaType.Photo
+           Taken = tOld
+           Added = tOld
+           Url = "/foo/bar.jpg"
+         }
+      ]
+    let set = existing |> List.map (fun e -> e :> obj)
+
+    let p1 = MemoryPersistence(set, mediasId) :> IPersistence
+    let newGuy =
+      {
+        Id = 1
+        Type = MediaType.Photo
+        Taken = tNew
+        Added = tNew
+        Url = "/foo/bar.jpg"
+      }
+    let _,outP = Internal.itemUpdate newGuy [] p1
+    // yuck, also points out need to give new id
+    let updated,_ = outP.Select(<@ fun (m:medias) -> m.Id = -1 @>)
+    let recd = List.head updated
+    recd |> should equal newGuy
 
   [<Test>]
   member x.``matchExisting finds existing files``() =

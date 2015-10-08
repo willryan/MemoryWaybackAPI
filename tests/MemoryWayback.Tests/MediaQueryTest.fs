@@ -64,7 +64,7 @@ type ``media queries`` ()=
     |]
 
   let persistence =
-    MemoryPersistence(List.map (fun m -> m :> obj) dbMedias)
+    MemoryPersistence(List.map (fun m -> m :> obj) dbMedias, mediasId)
 
 
   [<Test>]

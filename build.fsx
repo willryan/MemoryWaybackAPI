@@ -187,7 +187,7 @@ Target "RunTestsRelease" (fun _ ->
 )
 
 Target "RunTestsDebug" (fun _ ->
-  runTests Release
+  runTests Debug
 )
 
 #if MONO
@@ -397,6 +397,10 @@ Target "All" DoNothing
 #endif
   ==> "NuGet"
   ==> "BuildPackage"
+
+"BuildDebug"
+  ==> "CopyBinariesDebug"
+  ==> "RunTestsDebug"
 
 "CleanDocs"
   ==> "GenerateHelp"
