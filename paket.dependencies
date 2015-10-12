@@ -8,7 +8,10 @@ nuget FSharp.Data
 nuget ServiceStack.OrmLite.MySql
 
 nuget NUnit.Runners
+nuget xUnit
+nuget xUnit.runner.console
 nuget FsUnit
+nuget FsUnit.xUnit
 nuget canopy
 nuget Foq
 

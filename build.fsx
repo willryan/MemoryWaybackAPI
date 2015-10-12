@@ -8,6 +8,7 @@ open Fake.Git
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open Fake.UserInputHelper
+open Fake.Testing
 open System
 open System.IO
 #if MONO
@@ -181,6 +182,16 @@ let runTests mode =
           DisableShadowCopy = true
           TimeOut = TimeSpan.FromMinutes 20.
           OutputFile = "TestResults.xml" })
+
+let xRunTests mode =
+  !! (testAssemblies <| cfgToStr mode)
+  |> xUnit (fun p ->
+      { p with
+          ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
+          //ShadowCopy = false
+          TimeOut = TimeSpan.FromMinutes 20.
+          //XmlOutputPath = Some "TestResults.xml"
+      })
 
 Target "RunTestsRelease" (fun _ ->
   runTests Release

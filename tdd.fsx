@@ -14,16 +14,14 @@
 #r "Suave.dll"
 #r "Zlib.Portable.dll"
 #r "MemoryWayback.exe"
-#r "nunit.framework.dll"
-#r "tdd_support/nunit.core.dll"
-#r "tdd_support/nunit.core.interfaces.dll"
-#r "FsUnit.NUnit.dll"
-//#r "FsUnit.CustomMatchers.dll"
+#r "xUnit.dll"
+#r "FsUnit.Xunit.dll"
+#r "FsUnit.CustomMatchers.dll"
+#r "NHamcrest.dll"
 
 open MemoryWayback
-open NUnit.Framework
-open NUnit.Core
-open FsUnit
+open Xunit
+open FsUnit.Xunit
 open System.Reflection
 
 open MediaLibraryUpdate.Internal
@@ -31,11 +29,12 @@ open MediaLibraryUpdate.Internal
 //[<TestFixture>]
 type ``tdd tests``() =
 
-  //[<Test>]
+  [<Fact>]
   member x.``test a thing``() =
-    2 + 2 |> should equal 5
+    3 + 2 |> should equal 5
 
 let runTests() =
   ``tdd tests``().``test a thing``()
 
 runTests()
+printfn "PASS!!!!!!!"
