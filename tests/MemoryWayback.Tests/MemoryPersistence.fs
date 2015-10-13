@@ -26,9 +26,10 @@ let mediasId =
     SetId = mediasSetId
   }
 
-type MemoryPersistence(s:obj list, idF : DbIdentity) =
+type MemoryPersistence(name: string, s:obj list, idF : DbIdentity) =
   let mutable nextId = 0
   let set = s
+  let name = name
   interface IPersistence with
     member x.Select<'dbType> (e:Expr<'dbType -> bool>) =
       let evalF = (QuotationEvaluator.Evaluate<'dbType -> bool> e)
@@ -43,7 +44,7 @@ type MemoryPersistence(s:obj list, idF : DbIdentity) =
       let without = set |> List.filter (fun er ->
          (idF.GetId er) <> (idF.GetId (r :> obj))
       )
-      (MemoryPersistence(without, idF) :> IPersistence).Insert r
+      (MemoryPersistence(name + "'", without, idF) :> IPersistence).Insert r
     member x.Insert<'dbType> (r:'dbType) =
       let useR =
         match idF.GetId (r :> obj) with
@@ -51,7 +52,10 @@ type MemoryPersistence(s:obj list, idF : DbIdentity) =
           nextId <- nextId + 1
           idF.SetId (r :> obj) nextId
         | _ -> r :> obj
-      (useR :?> 'dbType , MemoryPersistence(useR :: set, idF) :> IPersistence)
+      (useR :?> 'dbType , MemoryPersistence(name + "'", useR :: set, idF) :> IPersistence)
     member x.Delete<'dbType> (r:'dbType) =
-      let p2 = MemoryPersistence(List.filter (fun x -> x <> (r :> obj)) set, idF)
+      let p2 = MemoryPersistence(name + "'", List.filter (fun x -> x <> (r :> obj)) set, idF)
       (true , p2 :> IPersistence)
+
+  override x.ToString() =
+    sprintf "%s: %A" name set

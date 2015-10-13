@@ -7,15 +7,7 @@ open MemoryWayback.DbTypes
 open ExtCore.Control
 
 module Internal =
-  let updateMedia dirFinder fileHandler removeOld dir (per:IPersistence) : IPersistence =
-    let time = DateTime.UtcNow
-    let files = dirFinder dir
-    files
-    |> List.fold (fun p file ->
-      fileHandler time file p
-    ) per
-    |> removeOld time
-
+   // SIMPLE
   let itemUpdate (newValue:medias) existingItems (per:IPersistence) =
     match existingItems with
       | [] ->
@@ -25,26 +17,19 @@ module Internal =
         newValue.Id <- itm.Id
         per.Update(newValue)
 
-  let matchExisting (file:FileInfo) (per:IPersistence) =
+  let matchExisting (newMedia:medias) (per:IPersistence) =
     per.Select(<@ fun (media:medias) ->
-      media.Url = file.FullName
+      media.Url = newMedia.Url
     @>)
 
-  let fileUpdate time (file:FileInfo) (p:IPersistence) : IPersistence =
-    let newMedia =
-      {
-        Id = -1
-        Url = file.FullName
-        Taken = file.LastWriteTime
-        Added = time
-        Type = MediaType.Photo
-      }
-
-    let fn = state {
-      let! items = matchExisting file
-      return itemUpdate newMedia items
+  let createNewMedia time (file:FileInfo) =
+    {
+      Id = -1
+      Url = file.FullName
+      Taken = file.LastWriteTime
+      Added = time
+      Type = MediaType.Photo
     }
-    State.execute fn p
 
   let rec removeAll (recs:medias list) (p:IPersistence) =
     match recs with
@@ -58,6 +43,36 @@ module Internal =
       media.Added < t
     @>)
 
-  let removeOld (time:DateTime) (p:IPersistence) =
-    let old, newP = getOldMedias p time
+  let dirFinder (name:string) : (FileInfo list) =
+    (new DirectoryInfo(name)).GetFiles()
+    |> Array.toList
+
+   // COMPOSITE
+  let removeOld getOldF (time:DateTime) (p:IPersistence) =
+    let old, newP = getOldF p time
     removeAll old newP
+
+  let fileUpdate makeNewF matchF updateF time file (p:'p) : 'p =
+    let newMedia = makeNewF time file
+    let fn = state {
+      let! items = matchF newMedia
+      let! dbRec = updateF newMedia items
+      return dbRec
+    }
+    State.execute fn p
+
+  let updateMedia dirFinderF fileHandlerF removeOldF dir (per:IPersistence) : IPersistence =
+    let time = DateTime.UtcNow
+    let files = dirFinderF dir
+    files
+    |> List.fold (fun p file ->
+      fileHandlerF time file p
+    ) per
+    |> removeOldF time
+
+  // PARTIALS
+  let removeOldC = removeOld getOldMedias
+  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate
+
+let updateMedia : string -> IPersistence -> IPersistence =
+  Internal.updateMedia Internal.dirFinder Internal.fileUpdateC Internal.removeOldC

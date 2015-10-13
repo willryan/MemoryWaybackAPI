@@ -23,10 +23,10 @@ type ``media library updater`` ()=
   member x.``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
     let dirFileFinder dir = [dir + "/alpha.mov" ; dir + "/beta.jpg" ]
 
-    let p1 = MemoryPersistence([], mediasId) :> IPersistence
-    let p2 = MemoryPersistence([], mediasId) :> IPersistence
-    let p3 = MemoryPersistence([], mediasId) :> IPersistence
-    let p4 = MemoryPersistence([], mediasId) :> IPersistence
+    let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
+    let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
+    let p3 = MemoryPersistence("p3", [], mediasId) :> IPersistence
+    let p4 = MemoryPersistence("p4", [], mediasId) :> IPersistence
     let fileHandler t fileName (p:IPersistence) =
       match fileName,p with
       | "./alpha.mov",p when p = p1 -> p2
@@ -54,7 +54,7 @@ type ``media library updater`` ()=
       ]
     let set = existing |> List.map (fun e -> e :> obj)
 
-    let p1 = MemoryPersistence(set, mediasId) :> IPersistence
+    let p1 = MemoryPersistence("p1", set, mediasId) :> IPersistence
     let newGuy =
       {
         Id = 1
@@ -84,7 +84,7 @@ type ``media library updater`` ()=
       ]
     let set = existing |> List.map (fun e -> e :> obj)
 
-    let p1 = MemoryPersistence(set, mediasId) :> IPersistence
+    let p1 = MemoryPersistence("p1", set, mediasId) :> IPersistence
     let newGuy =
       {
         Id = -1
