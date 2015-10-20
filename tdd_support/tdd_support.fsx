@@ -24,7 +24,7 @@ let runTests (fixture: obj) (tests: string list) =
   let typ = fixture.GetType()
   let useMethods =
     match tests with
-    | [] -> typ.GetMethods()
+    | [] -> typ.GetMethods(System.Reflection.BindingFlags.Instance)
     | _ ->
       tests
       |> List.map (fun name -> typ.GetMethod(name))

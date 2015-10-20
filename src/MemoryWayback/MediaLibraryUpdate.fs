@@ -61,7 +61,7 @@ module Internal =
     }
     State.execute fn p
 
-  let updateMedia dirFinderF fileHandlerF removeOldF dir (per:IPersistence) : IPersistence =
+  let updateMedia dirFinderF fileHandlerF removeOldF dir per =
     let time = DateTime.UtcNow
     let files = dirFinderF dir
     files

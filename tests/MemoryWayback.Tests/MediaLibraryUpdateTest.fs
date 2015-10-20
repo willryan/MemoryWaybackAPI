@@ -14,6 +14,23 @@ open Foq
 open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
 
+let mutable time = DateTime.UtcNow - TimeSpan.FromDays(100.)
+let makeMedia typ id url =
+  time <- time + TimeSpan.FromDays(1.)
+  {
+      Id = id
+      Url = url
+      Taken = time + TimeSpan.FromHours(1.)
+      Added = time + TimeSpan.FromHours(2.)
+      Type = typ
+  }
+let makePhoto = makeMedia MediaType.Photo
+let makeVideo  = makeMedia MediaType.Video
+let matches media p =
+  Internal.matchExisting media p |> fst
+let firstMatch media p =
+  matches media p |> List.head
+
 [<TestFixture>]
 type ``media library updater`` ()=
 
@@ -26,7 +43,7 @@ type ``media library updater`` ()=
     let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
     let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
     let p3 = MemoryPersistence("p3", [], mediasId) :> IPersistence
-    let p4 = MemoryPersistence("p4", [], mediasId) :> IPersistence
+    let p4 = MemoryPersistence("p1", [], mediasId) :> IPersistence
     let fileHandler t fileName (p:IPersistence) =
       match fileName,p with
       | "./alpha.mov",p when p = p1 -> p2
@@ -102,8 +119,34 @@ type ``media library updater`` ()=
 
   [<Test>]
   member x.``matchExisting finds existing files``() =
-    2 + 2 |> should equal 4
+    let existing1 = makePhoto 1 "/a/b/c.jpg"
+    let existing2 = makeVideo 2 "/d/e/f.mov"
+    let p = MemoryPersistence("p1", [], mediasId) :> IPersistence
+    let _,p2 = p.Insert(existing1)
+    let _,p3 = p2.Insert(existing2)
+    let match1 = makePhoto 3 "/d/e/f.mov" // type doesn't matter
+    let match2 = makeVideo 4 "/a/b/c.jpg" // type doesn't matter
+    let match3 = makeVideo 5 "/g/h/i.jpg"
+    firstMatch match1 p3 |> should equal existing2
+    firstMatch match2 p3 |> should equal existing1
+    matches match3 p3 |> should equal List.empty<medias>
 
   [<Test>]
   member x.``fileUpdate creates and/or updates entries``() =
-    2 + 2 |> should equal 4
+    let newRec = makeMedia MediaType.Video 1 "/a/b/c.jpg"
+    let mkNewF time (fileInfo:System.IO.FileInfo) = newRec
+
+    let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
+    let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
+    let p3 = MemoryPersistence("p3", [], mediasId) :> IPersistence
+    let matchF nm p =
+      match (nm, p) with
+      | (nm', p') when nm' = newRec && p' = p1 -> ([newRec], p2)
+      | _ -> raise <| Exception("no match")
+    let updF nm ex p =
+      match (nm, ex, p) with
+      | (nm', ex', p') when nm' = newRec && ex' = [newRec] && p' = p2 -> (newRec, p3)
+      | _ -> raise <| Exception("no match")
+    let file = System.IO.FileInfo("a")
+    Internal.fileUpdate mkNewF matchF updF time file p1
+    |> should equal p3
