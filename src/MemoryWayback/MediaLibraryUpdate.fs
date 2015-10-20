@@ -22,13 +22,25 @@ module Internal =
       media.Url = newMedia.Url
     @>)
 
+  let photoExtensions = [".jpg";".jpeg";".png";".bmp"]
+
+  let (|Photo|Video|) (ext:string) =
+    if (List.contains ext photoExtensions) then
+      Photo
+    else
+      Video
+
   let createNewMedia time (file:FileInfo) =
+    let filetype =
+      match file.Extension with
+      | Photo -> MediaType.Photo
+      | Video -> MediaType.Video
     {
       Id = -1
       Url = file.FullName
       Taken = file.LastWriteTime
       Added = time
-      Type = MediaType.Photo
+      Type = filetype
     }
 
   let rec removeAll (recs:medias list) (p:IPersistence) =

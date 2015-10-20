@@ -7,6 +7,7 @@ open MemoryWayback.Types
 open MemoryWayback.MediaQuery
 open MemoryWayback.MediaLibraryUpdate
 open System.Data
+open System.IO
 open System
 open System.Linq.Expressions
 open ServiceStack.OrmLite
@@ -150,3 +151,55 @@ type ``media library updater`` ()=
     let file = System.IO.FileInfo("a")
     Internal.fileUpdate mkNewF matchF updF time file p1
     |> should equal p3
+
+  [<Test>]
+  member x.``createNewMedia uses file info to determine fields``() =
+    let time = DateTime.UtcNow
+
+    let time1 = time - TimeSpan.FromDays(3.)
+    let fn1 = sprintf "%s%s.jpg" (Path.GetTempPath()) (Guid.NewGuid().ToString())
+    let f = File.Create(fn1)
+    f.Close()
+    let fi1 = new System.IO.FileInfo(fn1)
+    fi1.LastWriteTime <- time1
+
+    let time2 = time - TimeSpan.FromDays(2.)
+    let fn2 = sprintf "%s%s.avi" (Path.GetTempPath()) (Guid.NewGuid().ToString())
+    let f2 = File.Create(fn2)
+    f2.Close()
+    let fi2 = new System.IO.FileInfo(fn2)
+    fi2.LastWriteTime <- time2
+
+    let res = Internal.createNewMedia time fi1
+    (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
+    res.Taken <- time1
+    res
+    |> should equal
+      {
+        Id = -1
+        Url = fn1
+        Taken = time1
+        Added = time
+        Type = MediaType.Photo
+      }
+
+    File.Delete fn1
+
+    let res2 = Internal.createNewMedia time fi2
+    (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
+    res2.Taken <- time2
+    res2.Id |> should equal -1
+    res2.Url |> should equal fn2
+    res2.Added |> should equal time
+    res2.Type |> should equal MediaType.Video
+    res2
+    |> should equal
+      {
+        Id = -1
+        Url = fn2
+        Taken = time2
+        Added = time
+        Type = MediaType.Video
+      }
+
+    File.Delete fn2
