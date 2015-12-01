@@ -6,6 +6,7 @@ nuget Suave
 nuget FsPickler.Json
 nuget FSharp.Data
 nuget ServiceStack.OrmLite.MySql
+nuget ExifLib
 
 nuget NUnit.Runners
 nuget xUnit

@@ -8,6 +8,7 @@ open Fake.Git
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open Fake.UserInputHelper
+open Fake.ProcessTestRunner
 open Fake.Testing
 open System
 open System.IO
@@ -175,13 +176,20 @@ Target "RebuildDebug" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
-let runTests mode =
+let runTestsOld mode =
   !! (testAssemblies <| cfgToStr mode)
   |> NUnit (fun p ->
       { p with
           DisableShadowCopy = true
           TimeOut = TimeSpan.FromMinutes 20.
           OutputFile = "TestResults.xml" })
+
+let runTests mode =
+  let assemblies =
+    !! (testAssemblies <| cfgToStr mode)
+  let args = String.Join(" ", assemblies)
+  ["packages/NUnit.Console/tools/nunit3-console.exe" , args]
+  |> RunConsoleTests (fun p -> { p with TimeOut = TimeSpan.FromMinutes 20. })
 
 let xRunTests mode =
   !! (testAssemblies <| cfgToStr mode)

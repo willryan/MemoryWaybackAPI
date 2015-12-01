@@ -45,7 +45,7 @@ type ``media library updater`` ()=
     let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
     let p3 = MemoryPersistence("p3", [], mediasId) :> IPersistence
     let p4 = MemoryPersistence("p1", [], mediasId) :> IPersistence
-    let fileHandler t fileName (p:IPersistence) =
+    let fileHandler t dir fileName (p:IPersistence) =
       match fileName,p with
       | "./alpha.mov",p when p = p1 -> p2
       | "./beta.jpg",p when p = p2 -> p3
@@ -135,7 +135,7 @@ type ``media library updater`` ()=
   [<Test>]
   member x.``fileUpdate creates and/or updates entries``() =
     let newRec = makeMedia MediaType.Video 1 "/a/b/c.jpg"
-    let mkNewF time (fileInfo:System.IO.FileInfo) = newRec
+    let mkNewF tf time dir (fileInfo:System.IO.FileInfo) = newRec
 
     let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
     let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
@@ -149,7 +149,8 @@ type ``media library updater`` ()=
       | (nm', ex', p') when nm' = newRec && ex' = [newRec] && p' = p2 -> (newRec, p3)
       | _ -> raise <| Exception("no match")
     let file = System.IO.FileInfo("a")
-    Internal.fileUpdate mkNewF matchF updF time file p1
+    let takenF f t = DateTime.UtcNow
+    Internal.fileUpdate mkNewF matchF updF takenF time "." file p1
     |> should equal p3
 
   [<Test>]
@@ -170,7 +171,9 @@ type ``media library updater`` ()=
     let fi2 = new System.IO.FileInfo(fn2)
     fi2.LastWriteTime <- time2
 
-    let res = Internal.createNewMedia time fi1
+    let takenF fi typ = DateTime.UtcNow
+
+    let res = Internal.createNewMedia takenF time "." fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
     res.Taken <- time1
     res
@@ -185,7 +188,7 @@ type ``media library updater`` ()=
 
     File.Delete fn1
 
-    let res2 = Internal.createNewMedia time fi2
+    let res2 = Internal.createNewMedia takenF time "." fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
     res2.Taken <- time2
     res2.Id |> should equal -1

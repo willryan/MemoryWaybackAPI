@@ -4,3 +4,4 @@ Suave
 FsPickler.Json
 FSharp.Data
 ServiceStack.OrmLite.MySql
+ExifLib

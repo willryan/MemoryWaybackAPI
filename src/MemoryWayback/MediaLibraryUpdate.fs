@@ -5,6 +5,7 @@ open System.IO
 open MemoryWayback.Persistence
 open MemoryWayback.DbTypes
 open ExtCore.Control
+open ExifLib
 
 module Internal =
    // SIMPLE
@@ -30,15 +31,22 @@ module Internal =
     else
       Video
 
-  let createNewMedia time (file:FileInfo) =
+  let getTaken (file:FileInfo) fileType =
+    use reader = new ExifReader(file.FullName)
+    let taken = DateTime.UtcNow
+    ignore <| reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)
+    taken
+
+  let createNewMedia takenF time (rootDir:string) (file:FileInfo) =
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
+    let taken = takenF file filetype
     {
       Id = -1
-      Url = file.FullName
-      Taken = file.LastWriteTime
+      Url = file.FullName.Substring(rootDir.Length)
+      Taken = taken
       Added = time
       Type = filetype
     }
@@ -64,8 +72,8 @@ module Internal =
     let old, newP = getOldF p time
     removeAll old newP
 
-  let fileUpdate makeNewF matchF updateF time file (p:'p) : 'p =
-    let newMedia = makeNewF time file
+  let fileUpdate makeNewF matchF updateF takenF time rootDir file (p:'p) : 'p =
+    let newMedia = makeNewF takenF time rootDir file
     let fn = state {
       let! items = matchF newMedia
       let! dbRec = updateF newMedia items
@@ -78,13 +86,13 @@ module Internal =
     let files = dirFinderF dir
     files
     |> List.fold (fun p file ->
-      fileHandlerF time file p
+      fileHandlerF time dir file p
     ) per
     |> removeOldF time
 
   // PARTIALS
   let removeOldC = removeOld getOldMedias
-  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate
+  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate getTaken
 
 let updateMedia : string -> IPersistence -> IPersistence =
   Internal.updateMedia Internal.dirFinder Internal.fileUpdateC Internal.removeOldC

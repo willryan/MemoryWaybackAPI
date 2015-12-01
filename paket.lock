@@ -6,6 +6,7 @@ NUGET
       Selenium.Support (2.48.2)
       Selenium.WebDriver (2.48.2)
       SizSelCsZzz (0.3.36.0)
+    ExifLib (1.7.0)
     ExtCore (0.8.45)
     FAKE (4.10.0)
     Foq (1.7.1)
