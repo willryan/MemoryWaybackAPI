@@ -6,6 +6,7 @@ open MemoryWayback.Persistence
 open MemoryWayback.DbTypes
 open ExtCore.Control
 open ExifLib
+open MemoryWayback.FileHelper
 
 module Internal =
    // SIMPLE
@@ -23,26 +24,12 @@ module Internal =
       media.Url = newMedia.Url
     @>)
 
-  let photoExtensions = [".jpg";".jpeg";".png";".bmp"]
-
-  let (|Photo|Video|) (ext:string) =
-    if (List.contains ext photoExtensions) then
-      Photo
-    else
-      Video
-
-  let getTaken (file:FileInfo) fileType =
-    use reader = new ExifReader(file.FullName)
-    let taken = DateTime.UtcNow
-    ignore <| reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)
-    taken
-
-  let createNewMedia takenF time (rootDir:string) (file:FileInfo) =
+  let createNewMedia fh time (rootDir:string) (file:FileInfo) =
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
-    let taken = takenF file filetype
+    let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
     {
       Id = -1
       Url = file.FullName.Substring(rootDir.Length)
@@ -63,10 +50,6 @@ module Internal =
       media.Added < t
     @>)
 
-  let dirFinder (name:string) : (FileInfo list) =
-    (new DirectoryInfo(name)).GetFiles()
-    |> Array.toList
-
    // COMPOSITE
   let removeOld getOldF (time:DateTime) (p:IPersistence) =
     let old, newP = getOldF p time
@@ -81,18 +64,18 @@ module Internal =
     }
     State.execute fn p
 
-  let updateMedia dirFinderF fileHandlerF removeOldF dir per =
+  let updateMedia fileHandlerF removeOldF fh dir per =
     let time = DateTime.UtcNow
-    let files = dirFinderF dir
+    let files = fh.fileFinder dir
     files
     |> List.fold (fun p file ->
-      fileHandlerF time dir file p
+      fileHandlerF fh time dir file p
     ) per
     |> removeOldF time
 
   // PARTIALS
   let removeOldC = removeOld getOldMedias
-  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate getTaken
+  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate
 
-let updateMedia : string -> IPersistence -> IPersistence =
-  Internal.updateMedia Internal.dirFinder Internal.fileUpdateC Internal.removeOldC
+let updateMedia : FileHelper -> string -> IPersistence -> IPersistence =
+  Internal.updateMedia Internal.fileUpdateC Internal.removeOldC

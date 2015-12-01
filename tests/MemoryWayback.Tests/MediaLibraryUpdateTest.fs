@@ -6,6 +6,7 @@ open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
 open MemoryWayback.MediaLibraryUpdate
+open MemoryWayback.FileHelper
 open System.Data
 open System.IO
 open System
@@ -39,21 +40,30 @@ type ``media library updater`` ()=
 
   [<Test>]
   member x.``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
-    let dirFileFinder dir = [dir + "/alpha.mov" ; dir + "/beta.jpg" ]
+    let dirFileFinder dir =
+      [
+        new FileInfo(dir + "/alpha.mov")
+        new FileInfo(dir + "/beta.jpg")
+      ]
 
     let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
     let p2 = MemoryPersistence("p2", [], mediasId) :> IPersistence
     let p3 = MemoryPersistence("p3", [], mediasId) :> IPersistence
     let p4 = MemoryPersistence("p1", [], mediasId) :> IPersistence
-    let fileHandler t dir fileName (p:IPersistence) =
-      match fileName,p with
-      | "./alpha.mov",p when p = p1 -> p2
-      | "./beta.jpg",p when p = p2 -> p3
+    let fileHandler fh t dir (fileName:FileInfo) (p:IPersistence) =
+      match fileName.Name,p with
+      | "alpha.mov",p when p = p1 -> p2
+      | "beta.jpg",p when p = p2 -> p3
       | _ -> raiseNoMatch()
     let dbCleaner t = function
       | p when p = p3 -> p4
       | _ -> raiseNoMatch()
-    let outP = Internal.updateMedia dirFileFinder fileHandler dbCleaner "." p1
+    let fh = {
+      takenTime = (fun f -> Some DateTime.Now)
+      urlBuilder = (fun d f -> "")
+      fileFinder = dirFileFinder
+    }
+    let outP = Internal.updateMedia fileHandler dbCleaner fh "." p1
     outP |> should equal p4
 
   [<Test>]
@@ -173,9 +183,14 @@ type ``media library updater`` ()=
 
     let mutable rTime = time1
 
-    let takenF fi typ = rTime
+    let takenF fi = Some rTime
+    let fh = {
+      takenTime = takenF
+      fileFinder = (fun d -> [])
+      urlBuilder = (fun s f -> "")
+    }
 
-    let res = Internal.createNewMedia takenF time "" fi1
+    let res = Internal.createNewMedia fh time "" fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
     res.Taken <- time1
     res
@@ -193,7 +208,7 @@ type ``media library updater`` ()=
     rTime <- time2
 
 
-    let res2 = Internal.createNewMedia takenF time "" fi2
+    let res2 = Internal.createNewMedia fh time "" fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
     res2.Taken <- time2
     res2.Id |> should equal -1

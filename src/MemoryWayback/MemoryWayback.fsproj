@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
+    <Compile Include="FileHelper.fs" />
     <Compile Include="Persistence.fs" />
     <Compile Include="OrmlitePersistence.fs" />
     <Compile Include="DbTypes.fs" />
