@@ -2,7 +2,7 @@ source https://nuget.org/api/v2
 
 nuget ExtCore
 nuget FSharp.Quotations.Evaluator
-nuget Suave = 0.30.0
+nuget Suave
 nuget FsPickler.Json
 nuget FSharp.Data
 nuget ServiceStack.OrmLite.MySql

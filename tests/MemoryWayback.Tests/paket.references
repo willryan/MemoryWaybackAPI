@@ -5,6 +5,5 @@ FsPickler.Json
 FSharp.Data
 ServiceStack.OrmLite.MySql
 FsUnit
-FsUnit.xUnit
-xUnit
+NUnit
 Foq
