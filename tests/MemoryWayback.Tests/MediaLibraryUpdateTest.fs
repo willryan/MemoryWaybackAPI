@@ -171,9 +171,11 @@ type ``media library updater`` ()=
     let fi2 = new System.IO.FileInfo(fn2)
     fi2.LastWriteTime <- time2
 
-    let takenF fi typ = DateTime.UtcNow
+    let mutable rTime = time1
 
-    let res = Internal.createNewMedia takenF time "." fi1
+    let takenF fi typ = rTime
+
+    let res = Internal.createNewMedia takenF time "" fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
     res.Taken <- time1
     res
@@ -188,7 +190,10 @@ type ``media library updater`` ()=
 
     File.Delete fn1
 
-    let res2 = Internal.createNewMedia takenF time "." fi2
+    rTime <- time2
+
+
+    let res2 = Internal.createNewMedia takenF time "" fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
     res2.Taken <- time2
     res2.Id |> should equal -1
