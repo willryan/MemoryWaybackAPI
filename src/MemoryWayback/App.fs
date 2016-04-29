@@ -6,13 +6,15 @@ open Suave
 open Suave.Web
 open Suave.Json
 open Suave.Http
-open Suave.Http.Applicatives
-open Suave.Http.Files
-open Suave.Http.Successful
-open Suave.Http.RequestErrors
-open Suave.Types
+open Suave.Http
+open Suave.Files
+open Suave.Successful
+open Suave.RequestErrors
+open Suave.Operators
+open Suave.EventSource
+open Suave.Filters
+open Suave.Writers
 open Suave.Utils
-open Suave.Log
 open System.IO
 open System.Text
 open Nessos.FsPickler
@@ -34,16 +36,19 @@ let persist stateFunc =
   Persistence <- p
   res
 
+let greetings q =
+  defaultArg (Option.ofChoice(q ^^ "name")) "World" |> sprintf "Hello %s"
+
 let okJson o =
   OK (pickler.PickleToString o)
-  >>= Writers.setMimeType "application/json"
+    >=> setMimeType "application/json"
 
 let handleQuery ctx =
   printfn "%A" ctx.request.query
   let fromValue = Choice.orDefault "" (ctx.request.queryParam "from")
   let toValue = Choice.orDefault "" (ctx.request.queryParam "to")
   let types = Choice.orDefault "" (ctx.request.queryParam "types")
-  //printfn "%s - %s : %s" fromValue toValue types
+  printfn "%s - %s : %s" fromValue toValue types
   let fromDt = DateTime.Parse fromValue
   let toDt = DateTime.Parse toValue
   let typeEnums =
@@ -58,10 +63,11 @@ let handleQuery ctx =
   }
   (okJson <| persist (getResults o)) ctx
 
+
 let app =
   choose
-    [ GET >>= choose
-        [ path "/media-query" >>= handleQuery ]
+    [ GET >=> choose
+        [ path "/media-query" >=> handleQuery ]
     ]
 
 let defaultArgs = [| "server" |]

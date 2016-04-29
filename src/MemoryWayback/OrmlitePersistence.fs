@@ -41,11 +41,11 @@ let DbDelete record =
   connection.Delete<'dbType> [|record|] > 0
 
 type OrmlitePersistence() =
-  member x.change (updFun:('dbType -> 'ig)) record =
+  member x.Change (updFun:('dbType -> 'ig)) record =
     (updFun record, x :> IPersistence)
   interface IPersistence with
     member x.Select<'dbType> e =
       DbSelect<'dbType> e, x :> IPersistence
-    member x.Update<'dbType> (r:'dbType) = x.change DbUpdate r
-    member x.Insert<'dbType> (r:'dbType) = x.change DbInsert r
-    member x.Delete<'dbType> (r:'dbType) = x.change DbDelete r
+    member x.Update<'dbType> (r:'dbType) = x.Change DbUpdate r
+    member x.Insert<'dbType> (r:'dbType) = x.Change DbInsert r
+    member x.Delete<'dbType> (r:'dbType) = x.Change DbDelete r

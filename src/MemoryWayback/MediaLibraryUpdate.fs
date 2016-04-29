@@ -2,11 +2,11 @@ module MemoryWayback.MediaLibraryUpdate
 
 open System
 open System.IO
-open MemoryWayback.Persistence
-open MemoryWayback.DbTypes
 open ExtCore.Control
 open ExifLib
 open MemoryWayback.FileHelper
+open MemoryWayback.Persistence
+open MemoryWayback.DbTypes
 
 module Internal =
    // SIMPLE
