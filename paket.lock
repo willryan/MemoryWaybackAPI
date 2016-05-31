@@ -49,7 +49,7 @@ NUGET
       NUnit.Extension.NUnitV2ResultWriter (3.2.1)
       NUnit.Extension.VSProjectLoader (3.2.1)
     Octokit (0.19)
-      Microsoft.Net.Http  - framework: net10, net11, net20, net30, net35, net40, net40-full
+      Microsoft.Net.Http
     Selenium.WebDriver (2.53)
     ServiceStack.Common (4.0.56)
       ServiceStack.Interfaces (>= 4.0.56)
