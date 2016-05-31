@@ -13,11 +13,9 @@ module Internal =
   let itemUpdate (newValue:medias) existingItems (per:IPersistence) =
     match existingItems with
       | [] ->
-        newValue.Id <- -1 // get a new id
-        per.Insert(newValue)
+        per.Insert({ newValue with Id = -1 })
       | itm :: _ ->
-        newValue.Id <- itm.Id
-        per.Update(newValue)
+        per.Update({ newValue with Id = itm.Id })
 
   let matchExisting (newMedia:medias) (per:IPersistence) =
     per.Select(<@ fun (media:medias) ->

@@ -125,8 +125,8 @@ type ``media library updater`` ()=
     // yuck, also points out need to give new id
     let updated,_ = outP.Select(<@ fun (m:medias) -> m.Url = "/bar/baz.jpg" @>)
     let recd = List.head updated
-    newGuy.Id <- recd.Id
-    recd |> should equal newGuy
+    let newGuy2 = {newGuy with Id = recd.Id}
+    recd |> should equal newGuy2
 
   [<Test>]
   member x.``matchExisting finds existing files``() =
@@ -192,8 +192,8 @@ type ``media library updater`` ()=
 
     let res = Internal.createNewMedia fh time "" fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
-    res.Taken <- time1
-    res
+    let res_time = {res with Taken = time1}
+    res_time
     |> should equal
       {
         Id = -1
@@ -210,12 +210,12 @@ type ``media library updater`` ()=
 
     let res2 = Internal.createNewMedia fh time "" fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
-    res2.Taken <- time2
     res2.Id |> should equal -1
     res2.Url |> should equal fn2
     res2.Added |> should equal time
     res2.Type |> should equal MediaType.Video
-    res2
+    let res2_time = {res2 with Taken = time2 }
+    res2_time
     |> should equal
       {
         Id = -1
