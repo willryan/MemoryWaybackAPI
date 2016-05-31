@@ -4,6 +4,6 @@ Suave
 FsPickler.Json
 FSharp.Data
 ServiceStack.OrmLite.MySql
-FsUnit
-NUnit
+FsUnit.xUnit
+Xunit
 Foq

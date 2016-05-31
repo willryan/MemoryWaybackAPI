@@ -1,7 +1,7 @@
 module MemoryWayback.Tests.MediaLibraryUpdate
 
-open NUnit.Framework
-open FsUnit
+open Xunit
+open FsUnit.Xunit
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
@@ -33,12 +33,11 @@ let matches media p =
 let firstMatch media p =
   matches media p |> List.head
 
-[<TestFixture>]
 type ``media library updater`` ()=
 
   let raiseNoMatch () = raise <| Exception("Not a match")
 
-  [<Test>]
+  [<Fact>]
   member x.``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
     let dirFileFinder dir =
       [
@@ -66,7 +65,7 @@ type ``media library updater`` ()=
     let outP = Internal.updateMedia fileHandler dbCleaner fh "." p1
     outP |> should equal p4
 
-  [<Test>]
+  [<Fact>]
   member x.``itemUpdate updates existing entries``() =
     let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
     let tNew = DateTime.UtcNow
@@ -96,7 +95,7 @@ type ``media library updater`` ()=
     let recd = List.head updated
     recd |> should equal newGuy
 
-  [<Test>]
+  [<Fact>]
   member x.``itemUpdate creates new entries``() =
     let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
     let tNew = DateTime.UtcNow
@@ -128,7 +127,7 @@ type ``media library updater`` ()=
     let newGuy2 = {newGuy with Id = recd.Id}
     recd |> should equal newGuy2
 
-  [<Test>]
+  [<Fact>]
   member x.``matchExisting finds existing files``() =
     let existing1 = makePhoto 1 "/a/b/c.jpg"
     let existing2 = makeVideo 2 "/d/e/f.mov"
@@ -142,7 +141,7 @@ type ``media library updater`` ()=
     firstMatch match2 p3 |> should equal existing1
     matches match3 p3 |> should equal List.empty<medias>
 
-  [<Test>]
+  [<Fact>]
   member x.``fileUpdate creates and/or updates entries``() =
     let newRec = makeMedia MediaType.Video 1 "/a/b/c.jpg"
     let mkNewF tf time dir (fileInfo:System.IO.FileInfo) = newRec
@@ -163,7 +162,7 @@ type ``media library updater`` ()=
     Internal.fileUpdate mkNewF matchF updF takenF time "." file p1
     |> should equal p3
 
-  [<Test>]
+  [<Fact>]
   member x.``createNewMedia uses file info to determine fields``() =
     let time = DateTime.UtcNow
 

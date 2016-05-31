@@ -184,19 +184,20 @@ let runTestsOld mode =
           TimeOut = TimeSpan.FromMinutes 20.
           OutputFile = "TestResults.xml" })
 
-let runTests mode =
+let nrunTests mode =
   let assemblies =
     !! (testAssemblies <| cfgToStr mode)
   let args = String.Join(" ", assemblies)
   ["packages/NUnit.Console/tools/nunit3-console.exe" , args]
   |> RunConsoleTests (fun p -> { p with TimeOut = TimeSpan.FromMinutes 20. })
 
-let xRunTests mode =
+let runTests mode =
   !! (testAssemblies <| cfgToStr mode)
-  |> xUnit (fun p ->
+  |> xUnit2 (fun p ->
       { p with
-          ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
+          //ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
           //ShadowCopy = false
+          NoAppDomain = true
           TimeOut = TimeSpan.FromMinutes 20.
           //XmlOutputPath = Some "TestResults.xml"
       })
