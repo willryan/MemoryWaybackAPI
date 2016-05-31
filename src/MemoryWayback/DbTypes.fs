@@ -12,10 +12,11 @@ type MediaType =
   | Photo = 0
   | Video = 1
 
+[<CLIMutableAttribute>]
 type medias = {
-  mutable Id : int
-  mutable Url : string
-  mutable Taken : DateTime
-  mutable Added : DateTime
-  mutable Type : MediaType
+  Id : int
+  Url : string
+  Taken : DateTime
+  Added : DateTime
+  Type : MediaType
 }

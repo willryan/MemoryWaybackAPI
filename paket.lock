@@ -8,10 +8,16 @@ NUGET
     ExtCore (0.8.45)
     FAKE (4.25.5)
     Foq (1.7.1)
+    FSharp.Compiler.Service (2.0.0.6)
     FSharp.Core (4.0.0.1)
     FSharp.Data (2.2.5)
       Zlib.Portable (>= 1.10) - framework: portable-net40+sl50+wp80+win80
+    FSharp.Formatting (2.14.2)
+      FSharp.Compiler.Service (2.0.0.6)
+      FSharpVSPowerTools.Core (>= 2.3 < 2.4)
     FSharp.Quotations.Evaluator (1.0.7)
+    FSharpVSPowerTools.Core (2.3)
+      FSharp.Compiler.Service (>= 2.0.0.3)
     FsPickler (2.1)
     FsPickler.Json (2.1)
       FsPickler (2.1)
@@ -226,5 +232,5 @@ NUGET
 GITHUB
   remote: fsharp/FAKE
   specs:
-    modules/Octokit/Octokit.fsx (26cd2e6430a3ada972fa37a5a65606b2f7f427e3)
+    modules/Octokit/Octokit.fsx (26ea4dbb3d60352b88162bb32577015af2e7c44e)
       Octokit
