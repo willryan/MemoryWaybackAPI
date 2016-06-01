@@ -176,26 +176,20 @@ Target "RebuildDebug" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
-let runTestsOld mode =
-  !! (testAssemblies <| cfgToStr mode)
-  |> NUnit (fun p ->
-      { p with
-          DisableShadowCopy = true
-          TimeOut = TimeSpan.FromMinutes 20.
-          OutputFile = "TestResults.xml" })
-
 let runTests mode =
-  let assemblies =
-    !! (testAssemblies <| cfgToStr mode)
-  let args = String.Join(" ", assemblies)
-  ["packages/NUnit.Console/tools/nunit3-console.exe" , args]
-  |> RunConsoleTests (fun p -> { p with TimeOut = TimeSpan.FromMinutes 20. })
+  let focus = if getEnvironmentVarAsBool "FOCUS" then "cat == Focus" else ""
+  !! (testAssemblies <| cfgToStr mode)
+  |> NUnit3 (fun p ->
+      { p with
+          TimeOut = TimeSpan.FromMinutes 20.
+          Where = focus
+      })
 
 let xRunTests mode =
   !! (testAssemblies <| cfgToStr mode)
   |> xUnit (fun p ->
       { p with
-          ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
+          //ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
           //ShadowCopy = false
           TimeOut = TimeSpan.FromMinutes 20.
           //XmlOutputPath = Some "TestResults.xml"

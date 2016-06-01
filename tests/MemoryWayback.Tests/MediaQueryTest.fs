@@ -1,18 +1,17 @@
 module MemoryWayback.Tests.MediaQueryTest
 
+open System
+open System.Data
+open System.Linq.Expressions
 open NUnit.Framework
 open FsUnit
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
-open System.Data
-open System
-open System.Linq.Expressions
 open ServiceStack.OrmLite
 open Foq
 open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
-
 
 [<TestFixture>]
 type ``media queries`` ()=

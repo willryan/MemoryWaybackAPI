@@ -1,20 +1,20 @@
 module MemoryWayback.Tests.MediaLibraryUpdate
 
+open System
+open System.IO
+open System.Data
+open System.Linq.Expressions
+open ServiceStack.OrmLite
+open Foq
 open NUnit.Framework
 open FsUnit
+open MemoryWayback.Persistence
+open MemoryWayback.Tests.MemoryPersistence
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
 open MemoryWayback.MediaLibraryUpdate
 open MemoryWayback.FileHelper
-open System.Data
-open System.IO
-open System
-open System.Linq.Expressions
-open ServiceStack.OrmLite
-open Foq
-open MemoryWayback.Persistence
-open MemoryWayback.Tests.MemoryPersistence
 
 let mutable time = DateTime.UtcNow - TimeSpan.FromDays(100.)
 let makeMedia typ id url =
