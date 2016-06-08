@@ -13,6 +13,21 @@
             "env": {}
         },
         {
+            "name": "Tests",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/packages/NUnit.Console/tools/nunit3-console.exe",
+            "args": [
+                "--noheader",
+                "\"--timeout=120000\"",
+                "\"--debug\"",
+                "'${workspaceRoot}/tests/MemoryWayback.Tests/bin/Debug/MemoryWayback.Tests.dll'"
+            ],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {}
+        },
+        {
             "name": "Attach",
             "type": "mono",
             "request": "attach",
