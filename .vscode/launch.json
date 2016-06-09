@@ -16,12 +16,11 @@
             "name": "Tests",
             "type": "mono",
             "request": "launch",
-            "program": "${workspaceRoot}/packages/NUnit.Console/tools/nunit3-console.exe",
+            "program": "${workspaceRoot}/packages/xunit.runner.console/tools/xunit.console.exe",
             "args": [
-                "--noheader",
-                "\"--timeout=120000\"",
-                "\"--debug\"",
-                "'${workspaceRoot}/tests/MemoryWayback.Tests/bin/Debug/MemoryWayback.Tests.dll'"
+                "${workspaceRoot}/tests/MemoryWayback.Tests/bin/Debug/MemoryWayback.Tests.dll",
+               "-noappdomain",
+                "-parallel", "none"
             ],
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
