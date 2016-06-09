@@ -1,9 +1,4 @@
 FSharp.Quotations.Evaluator
 ExtCore
-Suave
-FsPickler.Json
-FSharp.Data
-ServiceStack.OrmLite.MySql
-FsUnit
-NUnit
-Foq
+FsUnit.xUnit
+Xunit

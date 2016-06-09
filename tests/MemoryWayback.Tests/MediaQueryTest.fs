@@ -1,20 +1,18 @@
 module MemoryWayback.Tests.MediaQueryTest
 
-open System
-open System.Data
-open System.Linq.Expressions
-open NUnit.Framework
-open FsUnit
+open Xunit
+open FsUnit.Xunit
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
-open ServiceStack.OrmLite
-open Foq
+open System.Data
+open System
+open System.Linq.Expressions
 open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
 
-[<TestFixture>]
-type ``media queries`` ()=
+module ``media queries`` =
+
   let now = DateTime.Now
   let makeDbPhoto id taken =
     {
@@ -66,18 +64,18 @@ type ``media queries`` ()=
     MemoryPersistence("per", List.map (fun m -> m :> obj) dbMedias, mediasId)
 
 
-  [<Test>]
-  member x.``findMedias hits db and transfers into fsharp type`` ()=
+  [<Fact>]
+  let ``findMedias hits db and transfers into fsharp type`` ()=
     let q = {
       From = daysAgo 100
       To = daysAgo 1
       Types = [ MediaType.Photo ; MediaType.Video ]
     }
-    fst (Internal.findMedias q persistence)
-    |> should equal medias
+    let results = fst (Internal.findMedias q persistence)
+    List.toArray results |> should equal medias
 
-  [<Test>]
-  member x.``findMedias filters too old`` ()=
+  [<Fact>]
+  let ``findMedias filters too old`` ()=
     let q = {
       From = daysAgo 8
       To = daysAgo 1
@@ -86,8 +84,8 @@ type ``media queries`` ()=
     fst (Internal.findMedias q persistence)
     |> should equal [ medias.[0] ; medias.[2] ]
 
-  [<Test>]
-  member x.``findMedias filters too new`` ()=
+  [<Fact>]
+  let ``findMedias filters too new`` ()=
     let q = {
       From = daysAgo 18
       To = daysAgo 4
@@ -96,8 +94,8 @@ type ``media queries`` ()=
     fst (Internal.findMedias q persistence)
     |> should equal [ medias.[1] ; medias.[2] ; medias.[3] ]
 
-  [<Test>]
-  member x.``findMedias filters type`` ()=
+  [<Fact>]
+  let ``findMedias filters type`` ()=
     let q = {
       From = daysAgo 18
       To = daysAgo 0
@@ -106,8 +104,8 @@ type ``media queries`` ()=
     fst (Internal.findMedias q persistence)
     |> should equal [ medias.[2] ; medias.[3] ]
 
-  [<Test>]
-  member x.``getResults transforms medias into results`` ()=
+  [<Fact>]
+  let ``getResults transforms medias into results`` ()=
     let medias = [|
         makePhoto 1 (daysAgo 3)
         makePhoto 2 (daysAgo 1)

@@ -139,7 +139,12 @@ Target "CopyBinariesDebug" (fun _ ->
 // Clean build results
 
 Target "Clean" (fun _ ->
-    CleanDirs ["bin"; "temp"]
+    CleanDirs [
+     "bin"
+     "temp"
+     "src/MemoryWayback/bin"
+     "tests/MemoryWayback.Tests/bin"
+    ]
 )
 
 Target "CleanDocs" (fun _ ->
@@ -177,20 +182,11 @@ Target "RebuildDebug" (fun _ ->
 // Run the unit tests using test runner
 
 let runTests mode =
-  let focus = if getEnvironmentVarAsBool "FOCUS" then "cat == Focus" else ""
   !! (testAssemblies <| cfgToStr mode)
-  |> NUnit3 (fun p ->
+  |> xUnit2 (fun p ->
       { p with
-          TimeOut = TimeSpan.FromMinutes 20.
-          Where = focus
-      })
-
-let xRunTests mode =
-  !! (testAssemblies <| cfgToStr mode)
-  |> xUnit (fun p ->
-      { p with
-          //ToolPath = "packages/xunit.runner.console/tools/xunit.console.exe"
           //ShadowCopy = false
+          NoAppDomain = true
           TimeOut = TimeSpan.FromMinutes 20.
           //XmlOutputPath = Some "TestResults.xml"
       })
