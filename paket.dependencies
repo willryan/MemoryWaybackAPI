@@ -5,14 +5,15 @@ nuget ExtCore
 nuget FSharp.Quotations.Evaluator
 nuget Suave
 nuget FsPickler.Json
-nuget FSharp.Data
 nuget ServiceStack.OrmLite.MySql
 nuget ExifLib
 
-nuget NUnit.Runners
-nuget xUnit
-nuget xUnit.runner.console
-nuget FsUnit
+nuget xunit
+nuget xunit.core
+nuget xunit.assert version_in_path: true
+nuget xunit.runner.console
+nuget xunit.runner.visualstudio version_in_path: true
+
 nuget FsUnit.xUnit
 nuget canopy
 nuget Foq

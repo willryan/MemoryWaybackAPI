@@ -1,0 +1,12 @@
+#!/bin/sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
+./good.sh
