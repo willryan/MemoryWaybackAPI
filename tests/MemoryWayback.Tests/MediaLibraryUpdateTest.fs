@@ -11,8 +11,6 @@ open System.Data
 open System.IO
 open System
 open System.Linq.Expressions
-open ServiceStack.OrmLite
-open Foq
 open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
 
@@ -33,12 +31,12 @@ let matches media p =
 let firstMatch media p =
   matches media p |> List.head
 
-type ``media library updater`` ()=
+module ``media library updater`` =
 
   let raiseNoMatch () = raise <| Exception("Not a match")
 
   [<Fact>]
-  member x.``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
+  let ``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
     let dirFileFinder dir =
       [
         new FileInfo(dir + "/alpha.mov")
@@ -66,7 +64,7 @@ type ``media library updater`` ()=
     outP |> should equal p4
 
   [<Fact>]
-  member x.``itemUpdate updates existing entries``() =
+  let ``itemUpdate updates existing entries``() =
     let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
     let tNew = DateTime.UtcNow
     let existing =
@@ -96,7 +94,7 @@ type ``media library updater`` ()=
     recd |> should equal newGuy
 
   [<Fact>]
-  member x.``itemUpdate creates new entries``() =
+  let ``itemUpdate creates new entries``() =
     let tOld = DateTime.UtcNow - TimeSpan.FromDays(3.0)
     let tNew = DateTime.UtcNow
     let existing =
@@ -128,7 +126,7 @@ type ``media library updater`` ()=
     recd |> should equal newGuy2
 
   [<Fact>]
-  member x.``matchExisting finds existing files``() =
+  let ``matchExisting finds existing files``() =
     let existing1 = makePhoto 1 "/a/b/c.jpg"
     let existing2 = makeVideo 2 "/d/e/f.mov"
     let p = MemoryPersistence("p1", [], mediasId) :> IPersistence
@@ -142,7 +140,7 @@ type ``media library updater`` ()=
     matches match3 p3 |> should equal List.empty<medias>
 
   [<Fact>]
-  member x.``fileUpdate creates and/or updates entries``() =
+  let ``fileUpdate creates and/or updates entries``() =
     let newRec = makeMedia MediaType.Video 1 "/a/b/c.jpg"
     let mkNewF tf time dir (fileInfo:System.IO.FileInfo) = newRec
 
@@ -163,7 +161,7 @@ type ``media library updater`` ()=
     |> should equal p3
 
   [<Fact>]
-  member x.``createNewMedia uses file info to determine fields``() =
+  let ``createNewMedia uses file info to determine fields``() =
     let time = DateTime.UtcNow
 
     let time1 = time - TimeSpan.FromDays(3.)

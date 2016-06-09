@@ -8,13 +8,11 @@ open MemoryWayback.MediaQuery
 open System.Data
 open System
 open System.Linq.Expressions
-open ServiceStack.OrmLite
-open Foq
 open MemoryWayback.Persistence
 open MemoryWayback.Tests.MemoryPersistence
 
 
-type ``media queries`` ()=
+module ``media queries`` =
   let now = DateTime.Now
   let makeDbPhoto id taken =
     {
@@ -67,7 +65,7 @@ type ``media queries`` ()=
 
 
   [<Fact>]
-  member x.``findMedias hits db and transfers into fsharp type`` ()=
+  let ``findMedias hits db and transfers into fsharp type`` ()=
     let q = {
       From = daysAgo 100
       To = daysAgo 1
@@ -77,7 +75,7 @@ type ``media queries`` ()=
     List.toArray results |> should equal medias
 
   [<Fact>]
-  member x.``findMedias filters too old`` ()=
+  let ``findMedias filters too old`` ()=
     let q = {
       From = daysAgo 8
       To = daysAgo 1
@@ -87,7 +85,7 @@ type ``media queries`` ()=
     |> should equal [ medias.[0] ; medias.[2] ]
 
   [<Fact>]
-  member x.``findMedias filters too new`` ()=
+  let ``findMedias filters too new`` ()=
     let q = {
       From = daysAgo 18
       To = daysAgo 4
@@ -97,7 +95,7 @@ type ``media queries`` ()=
     |> should equal [ medias.[1] ; medias.[2] ; medias.[3] ]
 
   [<Fact>]
-  member x.``findMedias filters type`` ()=
+  let ``findMedias filters type`` ()=
     let q = {
       From = daysAgo 18
       To = daysAgo 0
@@ -107,7 +105,7 @@ type ``media queries`` ()=
     |> should equal [ medias.[2] ; medias.[3] ]
 
   [<Fact>]
-  member x.``getResults transforms medias into results`` ()=
+  let ``getResults transforms medias into results`` ()=
     let medias = [|
         makePhoto 1 (daysAgo 3)
         makePhoto 2 (daysAgo 1)

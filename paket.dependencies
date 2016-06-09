@@ -16,7 +16,6 @@ nuget xunit.runner.visualstudio version_in_path: true
 
 nuget FsUnit.xUnit
 nuget canopy
-nuget Foq
 
 nuget Fake
 
