@@ -7,7 +7,6 @@ NUGET
     ExifLib (1.7)
     ExtCore (0.8.45)
     FAKE (4.28)
-    Foq (1.7.1)
     FSharp.Compiler.Service (2.0.0.6)
     FSharp.Core (4.0.0.1)
     FSharp.Formatting (2.14.4)

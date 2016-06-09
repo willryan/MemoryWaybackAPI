@@ -37,9 +37,10 @@
     </DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\MemoryWayback.App.fsproj">
-      <Project>{94E2F6FA-F29E-4938-B54F-F594E017F79E}</Project>
-      <Name>MemoryWayback.App</Name>
+    <ProjectReference Include="..\src\MemoryWayback\MemoryWayback.fsproj">
+      <Project>{e0f41825-b21a-4775-8f1c-c57ba46b03bd}</Project>
+      <Name>MemoryWayback</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
