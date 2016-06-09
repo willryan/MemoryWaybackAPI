@@ -139,7 +139,12 @@ Target "CopyBinariesDebug" (fun _ ->
 // Clean build results
 
 Target "Clean" (fun _ ->
-    CleanDirs ["bin"; "temp"]
+    CleanDirs [
+     "bin"
+     "temp"
+     "src/MemoryWayback/bin"
+     "tests/MemoryWayback.Tests/bin"
+    ]
 )
 
 Target "CleanDocs" (fun _ ->
