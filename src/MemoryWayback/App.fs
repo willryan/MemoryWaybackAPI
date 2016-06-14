@@ -17,6 +17,7 @@ open Suave.Writers
 open Suave.Utils
 open System.IO
 open System.Text
+open ExtCore.Control
 open Nessos.FsPickler
 open Nessos.FsPickler.Json
 open MemoryWayback.DbTypes
@@ -43,24 +44,33 @@ let okJson o =
   OK (pickler.PickleToString o)
     >=> setMimeType "application/json"
 
+let parseDateParam ctx parm deflt =
+  let date = choice {
+    let! stringDate = ctx.request.queryParam parm
+    return DateTime.Parse stringDate
+  }
+  Choice.orDefault deflt date
+
+let parseTypes ctx parm deflt =
+  Choice.orDefault deflt (choice {
+    let! types = ctx.request.queryParam parm
+    return (types.Split ',')
+      |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
+      |> Array.toList
+    })
+
 let handleQuery ctx =
   printfn "%A" ctx.request.query
-  let fromValue = Choice.orDefault "" (ctx.request.queryParam "from")
-  let toValue = Choice.orDefault "" (ctx.request.queryParam "to")
-  let types = Choice.orDefault "" (ctx.request.queryParam "types")
-  printfn "%s - %s : %s" fromValue toValue types
-  let fromDt = DateTime.Parse fromValue
-  let toDt = DateTime.Parse toValue
-  let typeEnums =
-    (types.Split ',')
-    |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
-    |> Array.toList
+  let fromDt = parseDateParam ctx "from" (DateTime(0L))
+  let toDt = parseDateParam ctx "to" DateTime.UtcNow
+  let typeEnums = parseTypes ctx "types" [ MediaType.Photo ; MediaType.Video ]
   //printfn "%A - %A : %A" fromDt toDt typeEnums
   let o = {
     Query.From = fromDt
     To = toDt
     Types = typeEnums
   }
+  printfn "%A" o
   (okJson <| persist (getResults o)) ctx
 
 
