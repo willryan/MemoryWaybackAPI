@@ -24,9 +24,24 @@ MSBuildDefaults <- {
   MSBuildDefaults with Verbosity = Some Quiet
 }
 
+let targ0 name f =
+  Target name (fun _ -> f ())
+
+let targ1 name f a1 =
+  Target name (fun _ -> f a1)
+
+let targ2 name f a1 a2 =
+  Target name (fun _ -> f a1 a2)
+
 type BuildConfig =
   | Debug
   | Release
+
+let getBuildConfig () =
+  if environVar "Release" = "true" then
+    Release
+  else
+    Debug
 
 let cfgToStr = function
   | Debug -> "Debug"
@@ -127,33 +142,25 @@ let copyBinaries mode =
 // Copies binaries from default VS location to expected bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
-Target "CopyBinaries" (fun _ ->
-    copyBinaries Release
-)
 
-Target "CopyBinariesDebug" (fun _ ->
-    copyBinaries Debug
-)
+Target "CopyBinaries" (copyBinaries << getBuildConfig)
 
 // --------------------------------------------------------------------------------------
 // Clean build results
 
-Target "Clean" (fun _ ->
-    CleanDirs [
+targ1 "Clean" CleanDirs [
      "bin"
      "temp"
      "src/MemoryWayback/bin"
      "tests/MemoryWayback.Tests/bin"
     ]
-)
 
-Target "CleanDocs" (fun _ ->
-    CleanDirs ["docs/output"]
-)
+targ1 "CleanDocs" CleanDirs ["docs/output"]
 
 // --------------------------------------------------------------------------------------
 // Build library & test project
-let build mode target =
+let build target =
+  let mode = getBuildConfig()
   let buildF =
     match mode with
     | Debug -> MSBuildDebug
@@ -162,36 +169,26 @@ let build mode target =
   |> buildF "" target
   |> ignore
 
-Target "BuildRelease" (fun _ ->
-  build Release "Build"
-)
+targ1 "Build" build "Build"
+targ1 "Rebuild" build "Rebuild"
 
-Target "RebuildRelease" (fun _ ->
-  build Release "Rebuild"
-)
-
-Target "BuildDebug" (fun _ ->
-  build Debug "Build"
-)
-
-Target "RebuildDebug" (fun _ ->
-  build Debug "Rebuild"
-)
-
-Target "RunDebug" (fun _ ->
-  let exe = "src/MemoryWayback.Console/bin/Debug/MemoryWayback.Console.exe"
+let run () =
+  let config = getBuildConfig() |> cfgToStr
+  let exe = sprintf "src/MemoryWayback.Console/bin/%s/MemoryWayback.Console.exe" config
   ExecProcess (fun info ->
       info.FileName <- "mono"
       info.Arguments <- exe
       ()
     ) (TimeSpan.FromDays 5.0)
     |> ignore
-)
+
+targ0 "Run" run
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
-let runTests mode =
+let runTests () =
+  let mode = getBuildConfig()
   !! (testAssemblies <| cfgToStr mode)
   |> xUnit2 (fun p ->
       { p with
@@ -201,13 +198,8 @@ let runTests mode =
           //XmlOutputPath = Some "TestResults.xml"
       })
 
-Target "RunTestsRelease" (fun _ ->
-  runTests Release
-)
-
-Target "RunTestsDebug" (fun _ ->
-  runTests Debug
-)
+targ0 "RunTests" runTests
+targ0 "RunTestsRebuild" runTests
 
 #if MONO
 #else
@@ -401,9 +393,9 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "RebuildRelease"
+  ==> "Rebuild"
   ==> "CopyBinaries"
-  ==> "RunTestsRelease"
+  ==> "RunTestsRebuild"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
   ==> "All"
@@ -417,12 +409,11 @@ Target "All" DoNothing
   ==> "NuGet"
   ==> "BuildPackage"
 
-"BuildDebug"
-  ==> "CopyBinariesDebug"
-  ==> "RunTestsDebug"
+"Build"
+  ==> "RunTests"
 
-"BuildDebug"
-  ==> "RunDebug"
+"Build"
+  ==> "Run"
 
 "CleanDocs"
   ==> "GenerateHelp"
