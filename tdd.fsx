@@ -2,33 +2,40 @@ fsi.ShowDeclarationValues <- false
 fsi.ShowProperties <- false
 fsi.ShowIEnumerable <- false
 
-#load "tdd_support/tdd_support.fsx"
+#load "TddSupport/TddSupport.fsx"
+#load "TddProjectRefs.fsx"
 
-open Xunit
 open FsUnit.Xunit
-open System.Reflection
-open System
-open System.IO
+open MemoryWayback.DbTypes
+open MemoryWayback.Types
+open MemoryWayback.MediaQuery
+open MemoryWayback.Tests.MediaQueryTest.``media queries``
 
 module MyNewStuff =
   let add x y =
-    x + y + 1
+    x +  y
 
 //[<TestFixture>]
-type ``tdd tests``() =
 
-  [<Fact>]
-  member x.``next module``() =
-    MyNewStuff.add 2 3 |> should equal 5
+  //[<Fact>]
+let ``next module``() =
+  MyNewStuff.add 2 3 |> should equal 5
 
-  [<Fact>]
-  member x.``nother module``() =
-    MyNewStuff.add 2 2 |> should equal 4
+//[<Fact>]
+let ``nother module``() =
+  MyNewStuff.add 2 2 |> should equal 4
 
+let ``real test`` ()=
+  let q = {
+    From = daysAgo 10
+    To = daysAgo 1
+    Types = [ MediaType.Photo ; MediaType.Video ]
+  }
+  let results = fst (Internal.findMedias q persistence)
+  List.toArray results |> should equal medias
 
-Tdd_support.runTests (``tdd tests``())
-  [
-    "next module"
-    "nother module"
-  ]
-
+TddSupport.runTestsExpr [
+  <@ ``next module`` @>
+  <@ ``nother module`` @>
+  <@ ``real test`` @>
+]

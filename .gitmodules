@@ -1,0 +1,3 @@
+[submodule "TddSupport"]
+	path = TddSupport
+	url = git@github.com:willryan/FsiTdd.git
