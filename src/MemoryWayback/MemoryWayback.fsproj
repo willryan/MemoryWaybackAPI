@@ -55,7 +55,6 @@
     <Compile Include="MediaQuery.fs" />
     <Compile Include="MediaLibraryUpdate.fs" />
     <Compile Include="App.fs" />
-    <Compile Include="Main.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />
     <None Include="paket.template" />

@@ -1,7 +1,7 @@
 ﻿namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("MemoryWayback.App")>]
+[<assembly: AssemblyTitleAttribute("MemoryWayback.Console")>]
 [<assembly: AssemblyProductAttribute("MemoryWayback")>]
 [<assembly: AssemblyDescriptionAttribute("browse through old memories (photos, videos)")>]
 [<assembly: AssemblyVersionAttribute("1.0")>]

@@ -178,6 +178,16 @@ Target "RebuildDebug" (fun _ ->
   build Debug "Rebuild"
 )
 
+Target "RunDebug" (fun _ ->
+  let exe = "src/MemoryWayback.Console/bin/Debug/MemoryWayback.Console.exe"
+  ExecProcess (fun info ->
+      info.FileName <- "mono"
+      info.Arguments <- exe
+      ()
+    ) (TimeSpan.FromDays 5.0)
+    |> ignore
+)
+
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
@@ -410,6 +420,9 @@ Target "All" DoNothing
 "BuildDebug"
   ==> "CopyBinariesDebug"
   ==> "RunTestsDebug"
+
+"BuildDebug"
+  ==> "RunDebug"
 
 "CleanDocs"
   ==> "GenerateHelp"
