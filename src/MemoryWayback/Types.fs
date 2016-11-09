@@ -9,6 +9,15 @@ type Query = {
   Types : MediaType list
 }
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Query =
+  let getFrom q = q.From
+  let getTo q = q.To
+  let getTypes q = q.Types |> Seq.ofList
+
+let getRange q =
+  (Query.getFrom q, Query.getTo q)
+
 type Result =
   {
     Date: DateTime

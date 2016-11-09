@@ -157,7 +157,7 @@ module ``media library updater`` =
       | _ -> raise <| Exception("no match")
     let file = System.IO.FileInfo("a")
     let takenF f t = DateTime.UtcNow
-    Internal.fileUpdate mkNewF matchF updF takenF time "." file p1
+    Internal.fileUpdate (mkNewF, matchF, updF) takenF time "." file p1
     |> should equal p3
 
   [<Fact>]

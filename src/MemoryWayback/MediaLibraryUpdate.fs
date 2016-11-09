@@ -49,31 +49,33 @@ module Internal =
     @>)
 
    // COMPOSITE
-  let removeOld getOldF (time:DateTime) (p:IPersistence) =
-    let old, newP = getOldF p time
-    removeAll old newP
+  let removeOld getOldF =
+    fun (time:DateTime) (p:IPersistence) ->
+      let old, newP = getOldF p time
+      removeAll old newP
 
-  let fileUpdate makeNewF matchF updateF takenF time rootDir file (p:'p) : 'p =
-    let newMedia = makeNewF takenF time rootDir file
-    let fn = state {
-      let! items = matchF newMedia
-      let! dbRec = updateF newMedia items
-      return dbRec
-    }
-    State.execute fn p
+  let fileUpdate (makeNewF,matchF,updateF) =
+    fun takenF time rootDir file (p:'p) ->
+      let newMedia = makeNewF takenF time rootDir file
+      let fn = state {
+        let! items = matchF newMedia
+        let! dbRec = updateF newMedia items
+        return dbRec
+      }
+      State.execute fn p
 
-  let updateMedia fileHandlerF removeOldF fh dir per =
-    let time = DateTime.UtcNow
-    let files = fh.fileFinder dir
-    files
-    |> List.fold (fun p file ->
-      fileHandlerF fh time dir file p
-    ) per
-    |> removeOldF time
+  let updateMedia (fileHandlerF,removeOldF) =
+    fun fh dir per ->
+      let time = DateTime.UtcNow
+      let foldFile p file = fileHandlerF fh time dir file p
+      let files = fh.fileFinder dir
+      files
+      |> List.fold foldFile per
+      |> removeOldF time
 
   // PARTIALS
   let removeOldC = removeOld getOldMedias
-  let fileUpdateC = fileUpdate createNewMedia matchExisting itemUpdate
+  let fileUpdateC = fileUpdate (createNewMedia,matchExisting,itemUpdate)
 
 let updateMedia : FileHelper -> string -> IPersistence -> IPersistence =
-  Internal.updateMedia Internal.fileUpdateC Internal.removeOldC
+  Internal.updateMedia (Internal.fileUpdateC, Internal.removeOldC)
