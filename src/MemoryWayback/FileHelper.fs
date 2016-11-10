@@ -29,12 +29,10 @@ module Internal =
       use reader = new ExifReader(file.FullName)
       let taken = DateTime.UtcNow
       if (reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)) then
-        printfn "file %A" file.FullName
         Some taken
       else
         None
     with e ->
-      //printfn "file %A: %A" file.FullName e
       None
 
   let rec fileFinder (MediaDirectory name) =
