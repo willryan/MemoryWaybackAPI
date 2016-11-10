@@ -4,6 +4,7 @@ open System.IO
 open System
 open ExifLib
 open ExtCore.Collections
+open ExtCore.Control
 
 type MediaDirectory = MediaDirectory of string
 
@@ -25,15 +26,27 @@ module Internal =
   let urlBuilder (MediaDirectory rootDir) (file:FileInfo) =
     file.FullName.Substring(rootDir.Length)
   let takenTime (file:FileInfo) : DateTime option =
-    try
-      use reader = new ExifReader(file.FullName)
-      let taken = DateTime.UtcNow
-      if (reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)) then
-        Some taken
-      else
+    let exifRead (file:FileInfo) =
+      try
+        use reader = new ExifReader(file.FullName)
+        let taken = DateTime.UtcNow
+        if (reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)) then
+          Some taken
+        else
+          None
+      with e ->
         None
-    with e ->
-      None
+
+    let fileStampRead (file:FileInfo) =
+      if (file.CreationTime < file.LastWriteTime) then
+        Some file.CreationTime
+      else
+        Some file.LastWriteTime
+
+    let mpgRead (_:FileInfo) = None
+
+    let finders = [ exifRead ; mpgRead ; fileStampRead ]
+    List.fold (fun s fn -> Option.tryFillWith (fun _ -> fn file) s) None finders
 
   let rec fileFinder (MediaDirectory name) =
     let di = new DirectoryInfo(name)
