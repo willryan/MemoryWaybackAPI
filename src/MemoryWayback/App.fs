@@ -25,12 +25,22 @@ open MemoryWayback.Types
 open MemoryWayback.MediaQuery
 open MemoryWayback.Persistence
 open MemoryWayback.OrmlitePersistence
+open MemoryWayback.MemoryPersistence
+open MemoryWayback.FileHelper
 
 //let logger = Loggers.sane_defaults_for Debug
 
 let pickler = FsPickler.CreateJsonSerializer(indent = true, omitHeader = true)
 
-let mutable Persistence : IPersistence = OrmlitePersistence() :> IPersistence
+let getDbPersistence () = OrmlitePersistence() :> IPersistence
+
+let getMemoryPersistence dir = 
+  let p = MemoryPersistence("mem",[],mediasId) :> IPersistence
+  match dir with
+  | Some d -> MediaLibraryUpdate.updateMedia realFileHelper d p
+  | None -> p
+
+let mutable Persistence = getMemoryPersistence None
 
 let persist stateFunc =
   let (res,p) = stateFunc Persistence
@@ -80,7 +90,7 @@ let app =
         [ path "/media-query" >=> handleQuery ]
     ]
 
-let defaultArgs = [| "server" |]
+let defaultArgs = [| "db" |]
 
 let startApp () =
   startWebServer defaultConfig app
@@ -90,5 +100,8 @@ let start (args : string[]) =
   let realArgs = if (args.Length = 0) then defaultArgs else args
 
   match realArgs.[0] with
-  | "server" -> startApp()
+  | "db" -> startApp()
+  | "file" -> 
+    Persistence <- getMemoryPersistence <| Some (MediaDirectory realArgs.[1])
+    startApp()
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1

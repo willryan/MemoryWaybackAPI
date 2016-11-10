@@ -22,7 +22,7 @@ module Internal =
       media.Url = newMedia.Url
     @>)
 
-  let createNewMedia fh time (rootDir:string) (file:FileInfo) =
+  let createNewMedia fh time (MediaDirectory rootDir) (file:FileInfo) =
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
@@ -77,5 +77,5 @@ module Internal =
   let removeOldC = removeOld getOldMedias
   let fileUpdateC = fileUpdate (createNewMedia,matchExisting,itemUpdate)
 
-let updateMedia : FileHelper -> string -> IPersistence -> IPersistence =
+let updateMedia : FileHelper -> MediaDirectory -> IPersistence -> IPersistence =
   Internal.updateMedia (Internal.fileUpdateC, Internal.removeOldC)
