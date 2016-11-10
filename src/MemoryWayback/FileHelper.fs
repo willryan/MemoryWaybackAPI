@@ -44,8 +44,7 @@ module Internal =
     let subDirPhotos = 
       di.GetDirectories()
       |> Array.toList
-      |> List.map (fileFinder << (fun d ->  MediaDirectory d.FullName))
-      |> List.fold List.append []
+      |> List.collect (fileFinder << (fun d ->  MediaDirectory d.FullName))
     List.append photos subDirPhotos
 
 let realFileHelper = {
