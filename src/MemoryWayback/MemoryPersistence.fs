@@ -1,10 +1,9 @@
-module MemoryWayback.Tests.MemoryPersistence
+module MemoryWayback.MemoryPersistence
 
 open MemoryWayback.Persistence
 open Microsoft.FSharp.Quotations
 open FSharp.Quotations.Evaluator
 open MemoryWayback.DbTypes
-
 
 type DbIdentity =
   {

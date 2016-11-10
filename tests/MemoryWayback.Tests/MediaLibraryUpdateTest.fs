@@ -12,7 +12,7 @@ open System.IO
 open System
 open System.Linq.Expressions
 open MemoryWayback.Persistence
-open MemoryWayback.Tests.MemoryPersistence
+open MemoryWayback.MemoryPersistence
 
 let mutable time = DateTime.UtcNow - TimeSpan.FromDays(100.)
 let makeMedia typ id url =
@@ -60,7 +60,7 @@ module ``media library updater`` =
       urlBuilder = (fun d f -> "")
       fileFinder = dirFileFinder
     }
-    let outP = Internal.updateMedia fileHandler dbCleaner fh "." p1
+    let outP = Internal.updateMedia (fileHandler,dbCleaner) fh "." p1
     outP |> should equal p4
 
   [<Fact>]

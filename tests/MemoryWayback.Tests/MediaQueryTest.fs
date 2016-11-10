@@ -9,7 +9,7 @@ open System.Data
 open System
 open System.Linq.Expressions
 open MemoryWayback.Persistence
-open MemoryWayback.Tests.MemoryPersistence
+open MemoryWayback.MemoryPersistence
 
 module ``media queries`` =
 
