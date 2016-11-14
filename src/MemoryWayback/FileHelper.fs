@@ -5,6 +5,8 @@ open System
 open ExifLib
 open ExtCore.Collections
 open ExtCore.Control
+open System.Text.RegularExpressions
+open System.Linq
 
 type MediaDirectory = MediaDirectory of string
 
@@ -29,12 +31,27 @@ module Internal =
     let exifRead (file:FileInfo) =
       try
         use reader = new ExifReader(file.FullName)
-        let taken = DateTime.UtcNow
-        if (reader.GetTagValue(ExifTags.DateTimeDigitized, ref taken)) then
-          Some taken
+        let taken = DateTime.MinValue
+        if (reader.GetTagValue(ExifTags.DateTimeOriginal, ref taken)) then
+          if taken = DateTime.MinValue then
+            None
+          else
+            Some taken
         else
           None
       with e ->
+        None
+    
+    let fileNameTime (file:FileInfo) = 
+      let m = Regex.Match(file.Name, "IMG_(\d\d\d\d)(\d\d)(\d\d)_(\d\d)(\d\d)(\d\d)\.")
+      if m.Success then
+        let times = 
+          m.Groups.Cast<Group>()
+          |> Seq.skip 1
+          |> Seq.map (fun g -> System.Int32.Parse g.Value)
+          |> Seq.toArray
+        Some <| new DateTime(times.[0], times.[1], times.[2], times.[3], times.[4], times.[5])
+      else
         None
 
     let fileStampRead (file:FileInfo) =
@@ -45,7 +62,7 @@ module Internal =
 
     let mpgRead (_:FileInfo) = None
 
-    let finders = [ exifRead ; mpgRead ; fileStampRead ]
+    let finders = [ exifRead ; mpgRead ; fileNameTime ; fileStampRead ]
     List.fold (fun s fn -> Option.tryFillWith (fun _ -> fn file) s) None finders
 
   let rec fileFinder (MediaDirectory name) =

@@ -1,6 +1,7 @@
 module MemoryWayback.MediaLibraryUpdate
 
 open System
+open System.Net
 open System.IO
 open ExtCore.Control
 open ExifLib
@@ -28,9 +29,11 @@ module Internal =
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
+    let rootFh = FileInfo(rootDir)
+    let subPath = file.FullName.Substring(rootFh.FullName.Length)
     {
       Id = -1
-      Url = file.FullName.Substring(rootDir.Length)
+      Url = sprintf "/media%s" <| Uri.EscapeUriString subPath
       Taken = taken
       Added = time
       Type = filetype

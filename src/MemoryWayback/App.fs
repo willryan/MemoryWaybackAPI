@@ -87,21 +87,26 @@ let handleQuery ctx =
 let app =
   choose
     [ GET >=> choose
-        [ path "/media-query" >=> handleQuery ]
+        [ 
+          path "/media-query" >=> handleQuery 
+          pathScan "/media/%s" Files.browseFileHome
+        ]
     ]
 
-let defaultArgs = [| "db" |]
+let defaultArgs = [| "db" ; "." |]
 
-let startApp () =
-  startWebServer defaultConfig app
+let startApp (MediaDirectory dir) =
+  let cfg = { defaultConfig with homeFolder = Some dir }
+  startWebServer cfg app
   0
 
 let start (args : string[]) =
   let realArgs = if (args.Length = 0) then defaultArgs else args
 
+  let dir = MediaDirectory realArgs.[1]
   match realArgs.[0] with
-  | "db" -> startApp()
+  | "db" -> startApp dir
   | "file" -> 
-    Persistence <- getMemoryPersistence <| Some (MediaDirectory realArgs.[1])
-    startApp()
+    Persistence <- getMemoryPersistence <| Some dir
+    startApp dir
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1
