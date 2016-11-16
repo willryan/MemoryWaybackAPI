@@ -88,8 +88,8 @@ let app =
   choose
     [ GET >=> choose
         [ 
-          path "/media-query" >=> handleQuery 
-          pathScan "/media/%s" Files.browseFileHome
+          path "/api/media-query" >=> handleQuery 
+          pathScan "/api/media/%s" Files.browseFileHome
         ]
     ]
 
