@@ -59,12 +59,22 @@ let parseDateParam ctx parm deflt =
   }
   Choice.orDefault deflt date
 
+let queryParamMulti (req:HttpRequest) parm = 
+  let types = 
+    req.query 
+    |> List.choose (fun (k,v) -> 
+      match k with 
+      | k1 when k1 = parm -> v
+      | _ -> None)
+  match types with
+    | [] -> Choice.failwith "not found"
+    | l -> Choice.result l
+
 let parseTypes ctx parm deflt =
   Choice.orDefault deflt (choice {
-    let! types = ctx.request.queryParam parm
-    return (types.Split ',')
-      |> Array.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
-      |> Array.toList
+    let! types = queryParamMulti ctx.request parm
+    return types
+      |> List.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
     })
 
 let handleQuery ctx =
