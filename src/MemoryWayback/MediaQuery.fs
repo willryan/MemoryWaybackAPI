@@ -40,14 +40,14 @@ module Internal =
         |> Seq.toList
       let mediasToResults ms =
         ms
-        |> Seq.groupBy (fun r -> r.Taken)
+        |> Seq.groupBy (fun r -> r.Taken.Date)
+        |> Seq.sortBy (fun (d,rs) -> d)
         |> Seq.map (fun (d,rs) ->
         {
-          Date = d
+          Date = d.ToShortDateString()
           Photos = getUrl MediaType.Photo rs
           Videos = getUrl MediaType.Video rs
         })
-        |> Seq.sortBy (fun r -> r.Date)
         |> Seq.toList
 
       state {

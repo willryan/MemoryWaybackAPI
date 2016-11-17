@@ -20,7 +20,7 @@ let getRange q =
 
 type Result =
   {
-    Date: DateTime
+    Date: string
     Photos: string list
     Videos: string list
   }

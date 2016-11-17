@@ -14,6 +14,7 @@ open MemoryWayback.MemoryPersistence
 module ``media queries`` =
 
   let now = DateTime.Now
+
   let makeDbPhoto id taken =
     {
       medias.Id = id
@@ -46,6 +47,10 @@ module ``media queries`` =
     }
   let daysAgo (num:int) =
     now - TimeSpan.FromDays(float num)
+
+  let daysAgoString (num:int) = 
+    let date = daysAgo num
+    date.Date.ToShortDateString()
 
   let dbMedias = [
       makeDbPhoto 1 (daysAgo 3)
@@ -127,17 +132,17 @@ module ``media queries`` =
     let results = Seq.toArray (fst output).Results
     Array.length results |> should equal 3
     results.[0] |> should equal {
-      Date = daysAgo 3
+      Date = daysAgoString 3
       Photos = [medias.[0].Url]
       Videos = [medias.[2].Url]
     }
     results.[1] |> should equal {
-      Date = daysAgo 2
+      Date = daysAgoString 2
       Photos = []
       Videos = [medias.[3].Url ; medias.[4].Url]
     }
     results.[2] |> should equal {
-      Date = daysAgo 1
+      Date = daysAgoString 1
       Photos = [medias.[1].Url]
       Videos = []
     }
