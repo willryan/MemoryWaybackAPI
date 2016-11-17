@@ -18,8 +18,6 @@ open Suave.Utils
 open System.IO
 open System.Text
 open ExtCore.Control
-open Nessos.FsPickler
-open Nessos.FsPickler.Json
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
 open MemoryWayback.MediaQuery
@@ -27,10 +25,9 @@ open MemoryWayback.Persistence
 open MemoryWayback.OrmlitePersistence
 open MemoryWayback.MemoryPersistence
 open MemoryWayback.FileHelper
+open Newtonsoft.Json
 
 //let logger = Loggers.sane_defaults_for Debug
-
-let pickler = FsPickler.CreateJsonSerializer(indent = true, omitHeader = true)
 
 let getDbPersistence () = OrmlitePersistence() :> IPersistence
 
@@ -50,8 +47,9 @@ let persist stateFunc =
 let greetings q =
   defaultArg (Option.ofChoice(q ^^ "name")) "World" |> sprintf "Hello %s"
 
+let serSettings = new JsonSerializerSettings(ContractResolver = new Serialization.CamelCasePropertyNamesContractResolver())
 let okJson o =
-  OK (pickler.PickleToString o)
+  OK (JsonConvert.SerializeObject(o, serSettings))
     >=> setMimeType "application/json"
 
 let parseDateParam ctx parm deflt =

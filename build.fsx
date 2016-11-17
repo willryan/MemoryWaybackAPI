@@ -174,7 +174,11 @@ targ1 "Rebuild" build "Rebuild"
 
 let run () =
   let config = getBuildConfig() |> cfgToStr
-  let exe = sprintf "src/MemoryWayback.Console/bin/%s/MemoryWayback.Console.exe" config
+  let moreArgs =
+    System.Environment.GetCommandLineArgs()
+    |> Array.skip 3
+    |> (fun args -> String.Join(" ", args))
+  let exe = sprintf "src/MemoryWayback.Console/bin/%s/MemoryWayback.Console.exe %s" config moreArgs
   ExecProcess (fun info ->
       info.FileName <- "mono"
       info.Arguments <- exe
