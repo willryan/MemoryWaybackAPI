@@ -8,7 +8,7 @@
             "program": "${workspaceRoot}/src/MemoryWayback.Console/bin/Debug/MemoryWayback.Console.exe",
             "args": [
                 "file",
-                "/Users/Will/Pictures/Ashley"
+                "/Users/Will/Pictures/NonLibrary/"
             ],
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,

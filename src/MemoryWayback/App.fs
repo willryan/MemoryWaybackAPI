@@ -111,7 +111,7 @@ let startApp (MediaDirectory dir) =
 let start (args : string[]) =
   let realArgs = if (args.Length = 0) then defaultArgs else args
 
-  let dir = MediaDirectory realArgs.[1]
+  let dir = MediaDirectory <| realArgs.[1].TrimEnd('/')
   match realArgs.[0] with
   | "db" -> startApp dir
   | "file" -> 

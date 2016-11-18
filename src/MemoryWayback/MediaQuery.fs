@@ -41,7 +41,7 @@ module Internal =
       let mediasToResults ms =
         ms
         |> Seq.groupBy (fun r -> r.Taken.Date)
-        |> Seq.sortBy (fun (d,rs) -> d)
+        |> Seq.sortBy fst
         |> Seq.map (fun (d,rs) ->
         {
           Date = d.ToShortDateString()
