@@ -93,11 +93,14 @@ let handleQuery ctx =
 
 
 let app =
+  let publicDir = sprintf "%s/public" System.Environment.CurrentDirectory
   choose
     [ GET >=> choose
         [ 
           path "/api/media-query" >=> handleQuery 
           pathScan "/api/media/%s" Files.browseFileHome
+          path "/" >=> Files.file (sprintf "%s/index.hml" publicDir)
+          Files.browse publicDir
         ]
     ]
 
