@@ -209,3 +209,6 @@ FakesAssemblies/
 tags
 
 docs/output
+
+# output assets from frontend
+public
