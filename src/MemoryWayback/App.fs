@@ -108,6 +108,7 @@ let defaultArgs = [| "db" ; "." |]
 
 let startApp (MediaDirectory dir) =
   let cfg = { defaultConfig with homeFolder = Some dir }
+  ignore <| Process.Start("http://localhost:8083/index.html")
   startWebServer cfg app
   0
 
