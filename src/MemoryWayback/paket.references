@@ -1,6 +1,6 @@
 FSharp.Quotations.Evaluator
 ExtCore
 Suave
-FsPickler.Json
 ServiceStack.OrmLite.MySql
 ExifLib
+Newtonsoft.Json

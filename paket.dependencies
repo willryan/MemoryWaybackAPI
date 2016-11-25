@@ -4,9 +4,9 @@ source https://www.nuget.org/api/v2
 nuget ExtCore
 nuget FSharp.Quotations.Evaluator
 nuget Suave
-nuget FsPickler.Json
 nuget ServiceStack.OrmLite.MySql
 nuget ExifLib
+nuget Newtonsoft.Json
 
 nuget xunit
 nuget xunit.core

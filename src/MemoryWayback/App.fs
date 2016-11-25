@@ -44,9 +44,6 @@ let persist stateFunc =
   Persistence <- p
   res
 
-let greetings q =
-  defaultArg (Option.ofChoice(q ^^ "name")) "World" |> sprintf "Hello %s"
-
 let serSettings = new JsonSerializerSettings(ContractResolver = new Serialization.CamelCasePropertyNamesContractResolver())
 let okJson o =
   OK (JsonConvert.SerializeObject(o, serSettings))
@@ -93,13 +90,13 @@ let handleQuery ctx =
 
 
 let app =
-  let publicDir = sprintf "%s/public" System.Environment.CurrentDirectory
+  let publicDir = Path.Combine(System.Environment.CurrentDirectory, "public")
   choose
     [ GET >=> choose
         [ 
           path "/api/media-query" >=> handleQuery 
           pathScan "/api/media/%s" Files.browseFileHome
-          path "/" >=> Files.file (sprintf "%s/index.hml" publicDir)
+          path "/" >=> Files.file (Path.Combine(publicDir,"index.hml"))
           Files.browse publicDir
         ]
     ]

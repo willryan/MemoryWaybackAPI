@@ -4,8 +4,6 @@
 #r "MemoryWayback.Tests.dll"
 #r "ExtCore.dll"
 #r "FSharp.Quotations.Evaluator.dll"
-#r "FsPickler.dll"
-#r "FsPickler.Json.dll"
 #r "MySql.Data.dll"
 #r "Newtonsoft.Json.dll"
 #r "ServiceStack.Common.dll"
