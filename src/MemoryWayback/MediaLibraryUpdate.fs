@@ -30,10 +30,11 @@ module Internal =
       | Video -> MediaType.Video
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
     let rootFh = FileInfo(rootDir)
-    let subPath = file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")
+    let subPath = Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")
+    printfn "%s" subPath
     {
       Id = -1
-      Url = sprintf "/api/media%s" <| (Uri.EscapeUriString subPath)
+      Url = sprintf "/api/media%s" subPath
       Taken = taken
       Added = time
       Type = filetype
