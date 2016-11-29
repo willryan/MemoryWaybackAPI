@@ -101,10 +101,20 @@ let app =
         ]
     ]
 
-let defaultArgs = [| "db" ; "." |]
+let defaultArgs = [| "file" ; "." |]
 
 let startApp (MediaDirectory dir) =
-  let cfg = { defaultConfig with homeFolder = Some dir }
+  let mimeTypes =
+    defaultMimeTypesMap
+      @@ (function 
+        | ".avi" -> createMimeType "video/avi" false 
+        | ".mp4" -> createMimeType "video/mp4" false
+        | ".m4v" -> createMimeType "video/mp4" false
+        | ".mov" -> createMimeType "video/quicktime" false
+        | ".mpg" -> createMimeType "video/mpeg" false
+        | ".mpeg" -> createMimeType "video/mpeg" false 
+        | _ -> None)
+  let cfg = { defaultConfig with homeFolder = Some dir ; mimeTypesMap = mimeTypes }
   ignore <| Process.Start("http://localhost:8083/index.html")
   startWebServer cfg app
   0

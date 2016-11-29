@@ -28,6 +28,7 @@ module Internal =
       match file.Extension with
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
+      | Other ext -> raise <| Exception(sprintf "unknown file type %s" ext)
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
     let rootFh = FileInfo(rootDir)
     let subPath = Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")

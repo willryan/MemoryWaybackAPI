@@ -11,12 +11,17 @@ open System.Linq
 type MediaDirectory = MediaDirectory of string
 
 let photoExtensions = [".jpg";".jpeg"] //;".png";".bmp"]
+let videoExtensions = [".avi";".mov";".mpg";".mpeg";".mp4";".m4v"] //;".png";".bmp"]
 
-let (|Photo|Video|) (ext:string) =
+let allValidExtensions = List.append photoExtensions videoExtensions
+
+let (|Photo|Video|Other|) (ext:string) =
   if (List.contains ext photoExtensions) then
     Photo
-  else
+  else if (List.contains ext videoExtensions) then
     Video
+  else
+    Other ext
 
 type FileHelper = {
   urlBuilder : MediaDirectory -> FileInfo -> string
@@ -68,7 +73,7 @@ module Internal =
   let rec fileFinder (MediaDirectory name) =
     let di = new DirectoryInfo(name)
     let lst = di.GetFiles() |> Array.toList
-    let photos = lst |> List.filter (fun f -> List.contains f.Extension photoExtensions)
+    let photos = lst |> List.filter (fun f -> List.contains f.Extension allValidExtensions)
     let subDirPhotos = 
       di.GetDirectories()
       |> Array.toList
