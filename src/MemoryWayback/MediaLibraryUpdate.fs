@@ -31,7 +31,7 @@ module Internal =
       | Other ext -> raise <| Exception(sprintf "unknown file type %s" ext)
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
     let rootFh = FileInfo(rootDir)
-    let subPath = Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")
+    let subPath = (Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")).Replace("?","%3F")
     printfn "%s" subPath
     {
       Id = -1
