@@ -37,10 +37,10 @@ module ``media library updater`` =
 
   [<Fact>]
   let ``updateMedia iterates over directory for a library, creating, updating, and deleting as necessary`` ()=
-    let dirFileFinder (MediaDirectory dir) =
+    let dirFileFinder (dir:MediaDirectory) =
       [
-        new FileInfo(dir + "/alpha.mov")
-        new FileInfo(dir + "/beta.jpg")
+        new FileInfo(dir.Path + "/alpha.mov")
+        new FileInfo(dir.Path + "/beta.jpg")
       ]
 
     let p1 = MemoryPersistence("p1", [], mediasId) :> IPersistence
@@ -60,7 +60,7 @@ module ``media library updater`` =
       urlBuilder = (fun d f -> "")
       fileFinder = dirFileFinder
     }
-    let outP = Internal.updateMedia (fileHandler,dbCleaner) fh (MediaDirectory ".") p1
+    let outP = Internal.updateMedia (fileHandler,dbCleaner) DateTime.Now fh ({ Path = "." ; Mount = "1" }) p1
     outP |> should equal p4
 
   [<Fact>]
@@ -187,7 +187,7 @@ module ``media library updater`` =
       urlBuilder = (fun s f -> "")
     }
 
-    let res = Internal.createNewMedia fh time (MediaDirectory "") fi1
+    let res = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1"}) fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
     let res_time = {res with Taken = time1}
     res_time
@@ -205,7 +205,7 @@ module ``media library updater`` =
     rTime <- time2
 
 
-    let res2 = Internal.createNewMedia fh time (MediaDirectory "") fi2
+    let res2 = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1" }) fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
     res2.Id |> should equal -1
     res2.Url |> should equal fn2

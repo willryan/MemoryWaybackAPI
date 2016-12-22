@@ -31,13 +31,13 @@ open Newtonsoft.Json
 
 let getDbPersistence () = OrmlitePersistence() :> IPersistence
 
-let getMemoryPersistence dir = 
-  let p = MemoryPersistence("mem",[],mediasId) :> IPersistence
-  match dir with
-  | Some d -> MediaLibraryUpdate.updateMedia realFileHelper d p
-  | None -> p
+let getMemoryPersistence dirs = 
+  let time = DateTime.Now
+  let per = MemoryPersistence("mem",[],mediasId) :> IPersistence
+  let res = List.fold (fun p d -> MediaLibraryUpdate.updateMedia time realFileHelper d p) per dirs
+  res
 
-let mutable Persistence = getMemoryPersistence None
+let mutable Persistence = getMemoryPersistence []
 
 let persist stateFunc =
   let (res,p) = stateFunc Persistence
@@ -89,21 +89,25 @@ let handleQuery ctx =
   (okJson <| persist (getResults o)) ctx
 
 
-let app =
-  let publicDir = Path.Combine(System.Environment.CurrentDirectory, "public")
+let app publicDir mediaDirs =
+  let browseMount (mnt,path) =
+    let dir = 
+      mediaDirs
+      |> List.find (fun dir -> dir.Mount = mnt)
+    Files.browseFile dir.Path path
   choose
     [ GET >=> choose
         [ 
           path "/api/media-query" >=> handleQuery 
-          pathScan "/api/media/%s" Files.browseFileHome
+          pathScan "/api/media/%s/%s" browseMount
           path "/" >=> Files.file (Path.Combine(publicDir,"index.hml"))
-          Files.browse publicDir
+          Files.browseHome
         ]
     ]
 
 let defaultArgs = [| "file" ; "." |]
 
-let startApp (MediaDirectory dir) =
+let startApp (dirs : MediaDirectory list) =
   let mimeTypes =
     defaultMimeTypesMap
       @@ (function 
@@ -114,18 +118,23 @@ let startApp (MediaDirectory dir) =
         | ".mpg" -> createMimeType "video/mpeg" false
         | ".mpeg" -> createMimeType "video/mpeg" false 
         | _ -> None)
-  let cfg = { defaultConfig with homeFolder = Some dir ; mimeTypesMap = mimeTypes }
+  let publicDir = Path.Combine(System.Environment.CurrentDirectory, "public")
+  let cfg = { defaultConfig with homeFolder = Some publicDir ; mimeTypesMap = mimeTypes }
   ignore <| Process.Start("http://localhost:8083/index.html")
-  startWebServer cfg app
+  startWebServer cfg <| app publicDir dirs
   0
 
 let start (args : string[]) =
   let realArgs = if (args.Length = 0) then defaultArgs else args
 
-  let dir = MediaDirectory <| realArgs.[1].TrimEnd('/')
+  let dirs =
+    realArgs
+    |> Array.skip 1
+    |> Array.mapi (fun i arg -> { Mount = sprintf "%d" i ; Path = arg.TrimEnd('/', '\\') })
+    |> Array.toList
   match realArgs.[0] with
-  | "db" -> startApp dir
+  | "db" -> startApp dirs
   | "file" -> 
-    Persistence <- getMemoryPersistence <| Some dir
-    startApp dir
+    Persistence <- getMemoryPersistence dirs
+    startApp dirs
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1

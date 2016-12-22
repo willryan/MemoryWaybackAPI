@@ -8,7 +8,10 @@ open ExtCore.Control
 open System.Text.RegularExpressions
 open System.Linq
 
-type MediaDirectory = MediaDirectory of string
+type MediaDirectory = {
+  Path : string
+  Mount : string
+}
 
 let photoExtensions = [".jpg";".jpeg"] //;".png";".bmp"]
 let videoExtensions = [".avi";".mov";".mpg";".mpeg";".mp4";".m4v"] //;".png";".bmp"]
@@ -30,8 +33,8 @@ type FileHelper = {
 }
 
 module Internal =
-  let urlBuilder (MediaDirectory rootDir) (file:FileInfo) =
-    file.FullName.Substring(rootDir.Length)
+  let urlBuilder (rootDir:MediaDirectory) (file:FileInfo) =
+    file.FullName.Substring(rootDir.Path.Length)
   let takenTime (file:FileInfo) : DateTime option =
     let exifRead (file:FileInfo) =
       try
@@ -70,14 +73,14 @@ module Internal =
     let finders = [ exifRead ; mpgRead ; fileNameTime ; fileStampRead ]
     List.fold (fun s fn -> Option.tryFillWith (fun _ -> fn file) s) None finders
 
-  let rec fileFinder (MediaDirectory name) =
-    let di = new DirectoryInfo(name)
+  let rec fileFinder (name:MediaDirectory) =
+    let di = new DirectoryInfo(name.Path)
     let lst = di.GetFiles() |> Array.toList
     let photos = lst |> List.filter (fun f -> List.contains f.Extension allValidExtensions)
     let subDirPhotos = 
       di.GetDirectories()
       |> Array.toList
-      |> List.collect (fileFinder << (fun d ->  MediaDirectory d.FullName))
+      |> List.collect (fileFinder << (fun d -> { name with Path = d.FullName }))
     List.append photos subDirPhotos
 
 let realFileHelper = {

@@ -23,19 +23,19 @@ module Internal =
       media.Url = newMedia.Url
     @>)
 
-  let createNewMedia fh time (MediaDirectory rootDir) (file:FileInfo) =
+  let createNewMedia fh time (rootDir:MediaDirectory) (file:FileInfo) =
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
       | Other ext -> raise <| Exception(sprintf "unknown file type %s" ext)
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
-    let rootFh = FileInfo(rootDir)
+    let rootFh = FileInfo(rootDir.Path)
     let subPath = (Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")).Replace("?","%3F")
-    printfn "%s" subPath
+    //printfn "%s" subPath
     {
       Id = -1
-      Url = sprintf "/api/media%s" subPath
+      Url = sprintf "/api/media/%s%s" rootDir.Mount subPath
       Taken = taken
       Added = time
       Type = filetype
@@ -69,12 +69,12 @@ module Internal =
       }
       State.execute fn p
 
-  let updateMedia (fileHandlerF,removeOldF) =
-    fun fh dir per ->
-      let time = DateTime.UtcNow
+  type RemoveOldHandler = DateTime -> IPersistence -> IPersistence
+  type FileHandler = FileHelper -> DateTime -> MediaDirectory -> FileInfo -> IPersistence -> IPersistence
+  let updateMedia ( (fileHandlerF:FileHandler), (removeOldF:RemoveOldHandler)) =
+    fun time (fh:FileHelper) (dir:MediaDirectory) (per:IPersistence) ->
       let foldFile p file = fileHandlerF fh time dir file p
-      let files = fh.fileFinder dir
-      files
+      fh.fileFinder dir
       |> List.fold foldFile per
       |> removeOldF time
 
@@ -82,5 +82,5 @@ module Internal =
   let removeOldC = removeOld getOldMedias
   let fileUpdateC = fileUpdate (createNewMedia,matchExisting,itemUpdate)
 
-let updateMedia : FileHelper -> MediaDirectory -> IPersistence -> IPersistence =
+let updateMedia : DateTime -> FileHelper -> MediaDirectory -> IPersistence -> IPersistence =
   Internal.updateMedia (Internal.fileUpdateC, Internal.removeOldC)
