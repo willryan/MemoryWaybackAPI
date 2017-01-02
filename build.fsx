@@ -197,7 +197,7 @@ let runTests () =
   |> xUnit2 (fun p ->
       { p with
           //ShadowCopy = false
-          NoAppDomain = true
+          //NoAppDomain = true
           TimeOut = TimeSpan.FromMinutes 20.
           //XmlOutputPath = Some "TestResults.xml"
       })

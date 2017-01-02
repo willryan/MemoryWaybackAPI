@@ -59,6 +59,7 @@ module ``media library updater`` =
       takenTime = (fun f -> Some DateTime.Now)
       urlBuilder = (fun d f -> "")
       fileFinder = dirFileFinder
+      transformPath = (fun d -> id)
     }
     let outP = Internal.updateMedia (fileHandler,dbCleaner) DateTime.Now fh ({ Path = "." ; Mount = "1" }) p1
     outP |> should equal p4
@@ -185,16 +186,17 @@ module ``media library updater`` =
       takenTime = takenF
       fileFinder = (fun d -> [])
       urlBuilder = (fun s f -> "")
+      transformPath = (fun d -> id)
     }
 
     let res = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1"}) fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
-    let res_time = {res with Taken = time1}
-    res_time
+    let resTime = {res with Taken = time1}
+    resTime
     |> should equal
       {
         Id = -1
-        Url = fn1
+        Url = sprintf "/api/media/1%s" fn1
         Taken = time1
         Added = time
         Type = MediaType.Photo
@@ -207,16 +209,12 @@ module ``media library updater`` =
 
     let res2 = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1" }) fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
-    res2.Id |> should equal -1
-    res2.Url |> should equal fn2
-    res2.Added |> should equal time
-    res2.Type |> should equal MediaType.Video
-    let res2_time = {res2 with Taken = time2 }
-    res2_time
+    let res2Time = {res2 with Taken = time2 }
+    res2Time
     |> should equal
       {
         Id = -1
-        Url = fn2
+        Url = sprintf "/api/media/1%s" fn2
         Taken = time2
         Added = time
         Type = MediaType.Video

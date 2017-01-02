@@ -30,8 +30,7 @@ module Internal =
       | Video -> MediaType.Video
       | Other ext -> raise <| Exception(sprintf "unknown file type %s" ext)
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
-    let rootFh = FileInfo(rootDir.Path)
-    let subPath = (Uri.EscapeUriString <| file.FullName.Substring(rootFh.FullName.Length).Replace("\\", "/")).Replace("?","%3F")
+    let subPath = fh.transformPath rootDir file.FullName
     //printfn "%s" subPath
     {
       Id = -1

@@ -129,9 +129,9 @@ let start (args : string[]) =
 
   let dirs =
     realArgs
-    |> Array.skip 1
-    |> Array.mapi (fun i arg -> { Mount = sprintf "%d" i ; Path = arg.TrimEnd('/', '\\') })
     |> Array.toList
+    |> List.tail
+    |> List.mapi (fun i arg -> { Mount = sprintf "%d" i ; Path = arg.TrimEnd('/', '\\') })
   match realArgs.[0] with
   | "db" -> startApp dirs
   | "file" -> 

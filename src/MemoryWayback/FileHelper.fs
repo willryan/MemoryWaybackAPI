@@ -30,6 +30,7 @@ type FileHelper = {
   urlBuilder : MediaDirectory -> FileInfo -> string
   takenTime : FileInfo -> DateTime option
   fileFinder : MediaDirectory -> FileInfo list
+  transformPath : MediaDirectory -> string -> string
 }
 
 module Internal =
@@ -83,8 +84,16 @@ module Internal =
       |> List.collect (fileFinder << (fun d -> { name with Path = d.FullName }))
     List.append photos subDirPhotos
 
+  let transformPath (rootDir:MediaDirectory) fullPath = 
+    let rootFh = FileInfo rootDir.Path
+    String.substring rootFh.FullName.Length fullPath
+    |> String.replace "\\" "/"
+    |> String.replace "?" "%3F"
+    |> Uri.EscapeUriString
+
 let realFileHelper = {
   urlBuilder = Internal.urlBuilder
   takenTime = Internal.takenTime
   fileFinder = Internal.fileFinder
+  transformPath = Internal.transformPath
 }
