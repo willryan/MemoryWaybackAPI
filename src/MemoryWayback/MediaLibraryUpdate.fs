@@ -8,10 +8,11 @@ open ExifLib
 open MemoryWayback.FileHelper
 open MemoryWayback.Persistence
 open MemoryWayback.DbTypes
+open MemoryWayback.Types
 
 module Internal =
    // SIMPLE
-  let itemUpdate (newValue:medias) existingItems (per:IPersistence) =
+  let itemUpdate (newValue:medias) (existingItems:medias list) (per:IPersistence) =
     match existingItems with
       | [] ->
         per.Insert({ newValue with Id = -1 })
@@ -23,14 +24,16 @@ module Internal =
       media.Url = newMedia.Url
     @>)
 
-  let createNewMedia fh time (rootDir:MediaDirectory) (file:FileInfo) =
+
+  let createNewMedia fh time (rootDir:media_directories) (file:FileInfo) =
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
       | Video -> MediaType.Video
       | Other ext -> raise <| Exception(sprintf "unknown file type %s" ext)
     let taken = defaultArg (fh.takenTime file) DateTime.UtcNow
-    let subPath = fh.transformPath rootDir file.FullName
+    let md = Types.makeMediaDirectory rootDir
+    let subPath = fh.transformPath md file.FullName
     //printfn "%s" subPath
     {
       Id = -1
@@ -38,6 +41,7 @@ module Internal =
       Taken = taken
       Added = time
       Type = filetype
+      MediaDirectoryId = rootDir.Id
     }
 
   let rec removeAll (recs:medias list) (p:IPersistence) =
@@ -59,7 +63,7 @@ module Internal =
       removeAll old newP
 
   let fileUpdate (makeNewF,matchF,updateF) =
-    fun takenF time rootDir file (p:'p) ->
+    fun takenF time (rootDir:media_directories) file (p:'p) ->
       let newMedia = makeNewF takenF time rootDir file
       let fn = state {
         let! items = matchF newMedia
@@ -69,11 +73,12 @@ module Internal =
       State.execute fn p
 
   type RemoveOldHandler = DateTime -> IPersistence -> IPersistence
-  type FileHandler = FileHelper -> DateTime -> MediaDirectory -> FileInfo -> IPersistence -> IPersistence
+  type FileHandler = FileHelper -> DateTime -> media_directories -> FileInfo -> IPersistence -> IPersistence
   let updateMedia ( (fileHandlerF:FileHandler), (removeOldF:RemoveOldHandler)) =
-    fun time (fh:FileHelper) (dir:MediaDirectory) (per:IPersistence) ->
+    fun time (fh:FileHelper) (dir:media_directories) (per:IPersistence) ->
+      
       let foldFile p file = fileHandlerF fh time dir file p
-      fh.fileFinder dir
+      fh.fileFinder (makeMediaDirectory dir)
       |> List.fold foldFile per
       |> removeOldF time
 
@@ -81,5 +86,5 @@ module Internal =
   let removeOldC = removeOld getOldMedias
   let fileUpdateC = fileUpdate (createNewMedia,matchExisting,itemUpdate)
 
-let updateMedia : DateTime -> FileHelper -> MediaDirectory -> IPersistence -> IPersistence =
+let updateMedia : DateTime -> FileHelper -> media_directories -> IPersistence -> IPersistence =
   Internal.updateMedia (Internal.fileUpdateC, Internal.removeOldC)

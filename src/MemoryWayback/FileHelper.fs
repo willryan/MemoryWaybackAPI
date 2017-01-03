@@ -7,14 +7,23 @@ open ExtCore.Collections
 open ExtCore.Control
 open System.Text.RegularExpressions
 open System.Linq
-
-type MediaDirectory = {
-  Path : string
-  Mount : string
-}
+open MemoryWayback.Types
 
 let photoExtensions = [".jpg";".jpeg"] //;".png";".bmp"]
-let videoExtensions = [".avi";".mov";".mpg";".mpeg";".mp4";".m4v"] //;".png";".bmp"]
+let videoExtensionsToMime = 
+  [
+     (".avi","avi")
+     (".mp4","mp4")
+     (".m4v","mp4")
+     (".mov","quicktime")
+     (".mpg","mpeg")
+     (".mpeg","mpeg")
+  ]
+  |> Map.ofSeq
+let videoExtensions = 
+  videoExtensionsToMime
+  |> Map.toList
+  |> List.map fst
 
 let allValidExtensions = List.append photoExtensions videoExtensions
 

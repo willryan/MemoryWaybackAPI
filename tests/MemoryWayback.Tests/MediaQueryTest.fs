@@ -18,6 +18,7 @@ module ``media queries`` =
   let makeDbPhoto id taken =
     {
       medias.Id = id
+      MediaDirectoryId = 1
       Type = MediaType.Photo
       Taken = taken
       Added = taken
@@ -26,6 +27,7 @@ module ``media queries`` =
   let makeDbVideo id taken =
     {
       medias.Id = id
+      MediaDirectoryId = 1
       Type = MediaType.Video
       Taken = taken
       Added = taken

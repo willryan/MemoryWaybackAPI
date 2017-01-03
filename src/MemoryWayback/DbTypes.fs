@@ -15,8 +15,16 @@ type MediaType =
 [<CLIMutableAttribute>]
 type medias = {
   Id : int
+  MediaDirectoryId : int
   Url : string
   Taken : DateTime
   Added : DateTime
   Type : MediaType
+}
+
+[<CLIMutableAttribute>]
+type media_directories = {
+  Id : int
+  Path : string
+  Mount : string
 }

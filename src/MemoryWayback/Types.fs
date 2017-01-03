@@ -41,3 +41,11 @@ type Media =
   }
   override x.ToString () : string =
     sprintf "%A" x
+
+type MediaDirectory = {
+  Path : string
+  Mount : string
+}
+
+let makeMediaDirectory (dir:media_directories) = 
+  { MediaDirectory.Path = dir.Path ; Mount = dir.Mount }

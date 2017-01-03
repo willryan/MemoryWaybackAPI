@@ -110,14 +110,13 @@ let defaultArgs = [| "file" ; "." |]
 let startApp (dirs : MediaDirectory list) =
   let mimeTypes =
     defaultMimeTypesMap
-      @@ (function 
-        | ".avi" -> createMimeType "video/avi" false 
-        | ".mp4" -> createMimeType "video/mp4" false
-        | ".m4v" -> createMimeType "video/mp4" false
-        | ".mov" -> createMimeType "video/quicktime" false
-        | ".mpg" -> createMimeType "video/mpeg" false
-        | ".mpeg" -> createMimeType "video/mpeg" false 
-        | _ -> None)
+      @@ (fun ext ->
+        maybe {
+          let! suffix = Map.tryFind ext FileHelper.videoExtensionsToMime
+          let mimeType = sprintf "video/%s" suffix
+          return! createMimeType mimeType false
+        }
+      )
   let publicDir = Path.Combine(System.Environment.CurrentDirectory, "public")
   let cfg = { defaultConfig with homeFolder = Some publicDir ; mimeTypesMap = mimeTypes }
   ignore <| Process.Start("http://localhost:8083/index.html")
@@ -131,10 +130,11 @@ let start (args : string[]) =
     realArgs
     |> Array.toList
     |> List.tail
-    |> List.mapi (fun i arg -> { Mount = sprintf "%d" i ; Path = arg.TrimEnd('/', '\\') })
+    |> List.mapi (fun i arg -> { Id = i ; Mount = sprintf "%d" i ; Path = arg.TrimEnd('/', '\\') })
+  let mDirs = dirs |> List.map Types.makeMediaDirectory
   match realArgs.[0] with
-  | "db" -> startApp dirs
+  | "db" -> startApp mDirs
   | "file" -> 
     Persistence <- getMemoryPersistence dirs
-    startApp dirs
+    startApp mDirs
   | _ -> printfn "Unrecognized argument %s" args.[0] ; 1

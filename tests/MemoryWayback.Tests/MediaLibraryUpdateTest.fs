@@ -19,6 +19,7 @@ let makeMedia typ id url =
   time <- time + TimeSpan.FromDays(1.)
   {
       Id = id
+      MediaDirectoryId = 1
       Url = url
       Taken = time + TimeSpan.FromHours(1.)
       Added = time + TimeSpan.FromHours(2.)
@@ -61,7 +62,7 @@ module ``media library updater`` =
       fileFinder = dirFileFinder
       transformPath = (fun d -> id)
     }
-    let outP = Internal.updateMedia (fileHandler,dbCleaner) DateTime.Now fh ({ Path = "." ; Mount = "1" }) p1
+    let outP = Internal.updateMedia (fileHandler,dbCleaner) DateTime.Now fh ({ Id = 1 ; Path = "." ; Mount = "1" }) p1
     outP |> should equal p4
 
   [<Fact>]
@@ -72,6 +73,7 @@ module ``media library updater`` =
       [
          {
            Id = 1
+           MediaDirectoryId = 1
            Type = MediaType.Photo
            Taken = tOld
            Added = tOld
@@ -84,6 +86,7 @@ module ``media library updater`` =
     let newGuy =
       {
         Id = 1
+        MediaDirectoryId = 1
         Type = MediaType.Photo
         Taken = tNew
         Added = tNew
@@ -102,6 +105,7 @@ module ``media library updater`` =
       [
          {
            Id = 2
+           MediaDirectoryId = 1
            Type = MediaType.Photo
            Taken = tOld
            Added = tOld
@@ -114,6 +118,7 @@ module ``media library updater`` =
     let newGuy =
       {
         Id = -1
+        MediaDirectoryId = 1
         Type = MediaType.Photo
         Taken = tNew
         Added = tNew
@@ -158,7 +163,8 @@ module ``media library updater`` =
       | _ -> raise <| Exception("no match")
     let file = System.IO.FileInfo("a")
     let takenF f t = DateTime.UtcNow
-    Internal.fileUpdate (mkNewF, matchF, updF) takenF time "." file p1
+    let dir = { Id = 1 ; Path = "." ; Mount = "1" }
+    Internal.fileUpdate (mkNewF, matchF, updF) takenF time dir file p1
     |> should equal p3
 
   [<Fact>]
@@ -189,13 +195,14 @@ module ``media library updater`` =
       transformPath = (fun d -> id)
     }
 
-    let res = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1"}) fi1
+    let res = Internal.createNewMedia fh time ({ Id = 1 ; Path = "" ; Mount = "1"}) fi1
     (res.Taken - time1).TotalSeconds |> should lessThanOrEqualTo 1.
     let resTime = {res with Taken = time1}
     resTime
     |> should equal
       {
         Id = -1
+        MediaDirectoryId = 1
         Url = sprintf "/api/media/1%s" fn1
         Taken = time1
         Added = time
@@ -207,13 +214,14 @@ module ``media library updater`` =
     rTime <- time2
 
 
-    let res2 = Internal.createNewMedia fh time ({ Path = "" ; Mount = "1" }) fi2
+    let res2 = Internal.createNewMedia fh time ({ Id = 1 ; Path = "" ; Mount = "1" }) fi2
     (res2.Taken - time2).TotalSeconds |> should lessThanOrEqualTo 1.
     let res2Time = {res2 with Taken = time2 }
     res2Time
     |> should equal
       {
         Id = -1
+        MediaDirectoryId = 1
         Url = sprintf "/api/media/1%s" fn2
         Taken = time2
         Added = time
