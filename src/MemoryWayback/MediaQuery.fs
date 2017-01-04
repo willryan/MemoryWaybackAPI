@@ -31,32 +31,28 @@ module Internal =
       return List.map dbToCodeType res
     }
 
-  let getResults dbFinder =
-    fun q ->
-      let getUrl typ rs = 
-        rs
-        |> Seq.filter (fun r -> r.Type = typ)
-        |> Seq.map (fun r -> r.Url)
-        |> Seq.toList
-      let mediasToResults ms =
-        ms
-        |> Seq.groupBy (fun r -> r.Taken.Date)
-        |> Seq.sortBy fst
-        |> Seq.map (fun (d,rs) ->
+  let getResults dbFinder query =
+    let getUrl typ = 
+      Seq.choose (fun r -> if r.Type = typ then Some r.Url else None) 
+      >> Seq.toList
+    let mediasToResults =
+      Seq.groupBy (fun r -> r.Taken.Date)
+      >> Seq.sortBy fst
+      >> Seq.map (fun (d,rs) ->
         {
           Date = d.ToShortDateString()
           Photos = getUrl MediaType.Photo rs
           Videos = getUrl MediaType.Video rs
         })
-        |> Seq.toList
+      >> Seq.toList
 
-      state {
-        let! medias = dbFinder q
-        return {
-          Query = q
-          Results = mediasToResults medias
-        }
+    state {
+      let! medias = dbFinder query
+      return {
+        Query = query
+        Results = mediasToResults medias
       }
+    }
 
 
 let getResults : (Query -> StateFunc<IPersistence,Results>) =

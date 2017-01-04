@@ -162,9 +162,15 @@ module ``media library updater`` =
       | (nm', ex', p') when nm' = newRec && ex' = [newRec] && p' = p2 -> (newRec, p3)
       | _ -> raise <| Exception("no match")
     let file = System.IO.FileInfo("a")
-    let takenF f t = DateTime.UtcNow
+    let takenF f = Some DateTime.UtcNow
+    let fh = {
+      takenTime = takenF
+      fileFinder = (fun d -> [])
+      urlBuilder = (fun s f -> "")
+      transformPath = (fun d -> id)
+    }
     let dir = { Id = 1 ; Path = "." ; Mount = "1" }
-    Internal.fileUpdate (mkNewF, matchF, updF) takenF time dir file p1
+    Internal.fileUpdate (mkNewF, matchF, updF) fh time dir file p1
     |> should equal p3
 
   [<Fact>]

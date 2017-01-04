@@ -12,20 +12,20 @@ open MemoryWayback.Types
 
 module Internal =
    // SIMPLE
-  let itemUpdate (newValue:medias) (existingItems:medias list) (per:IPersistence) =
+  type UpdateMedia = medias -> medias list -> StateFunc<IPersistence,medias>
+  let itemUpdate : UpdateMedia = fun (newValue:medias) (existingItems:medias list) (per:IPersistence) ->
     match existingItems with
       | [] ->
         per.Insert({ newValue with Id = -1 })
       | itm :: _ ->
         per.Update({ newValue with Id = itm.Id })
 
-  let matchExisting (newMedia:medias) (per:IPersistence) =
-    per.Select(<@ fun (media:medias) ->
-      media.Url = newMedia.Url
-    @>)
+  type MatchMedia = medias -> StateFunc<IPersistence,medias list>
+  let matchExisting : MatchMedia = fun (newMedia:medias) (per:IPersistence) ->
+    per.Select(<@ fun (media:medias) -> media.Url = newMedia.Url @>)
 
-
-  let createNewMedia fh time (rootDir:media_directories) (file:FileInfo) =
+  type CreateMedia = FileHelper -> DateTime -> media_directories -> FileInfo -> medias
+  let createNewMedia : CreateMedia = fun (fh:FileHelper) time (rootDir:media_directories) (file:FileInfo) ->
     let filetype =
       match file.Extension with
       | Photo -> MediaType.Photo
@@ -44,6 +44,7 @@ module Internal =
       MediaDirectoryId = rootDir.Id
     }
 
+  type RemoveAllMedia = medias list -> IPersistence -> IPersistence
   let rec removeAll (recs:medias list) (p:IPersistence) =
     match recs with
     | recd :: tail ->
@@ -51,30 +52,26 @@ module Internal =
       removeAll tail p2
     | [] -> p
 
-  let getOldMedias (p:IPersistence) (t:DateTime) : (medias list * IPersistence) =
-    p.Select(<@ fun (media:medias) ->
-      media.Added < t
-    @>)
+  type GetOldMedia = IPersistence -> DateTime -> medias list * IPersistence
+  let getOldMedias : GetOldMedia = fun (p:IPersistence) (t:DateTime) ->
+    p.Select(<@ fun (media:medias) -> media.Added < t @>)
 
    // COMPOSITE
-  let removeOld getOldF =
-    fun (time:DateTime) (p:IPersistence) ->
-      let old, newP = getOldF p time
-      removeAll old newP
+  let removeOld (getOldF:GetOldMedia) (time:DateTime) (p:IPersistence) =
+    getOldF p time ||> removeAll 
 
-  let fileUpdate (makeNewF,matchF,updateF) =
-    fun takenF time (rootDir:media_directories) file (p:'p) ->
-      let newMedia = makeNewF takenF time rootDir file
+  let fileUpdate ((makeNewF:CreateMedia),(matchF:MatchMedia),(updateF:UpdateMedia)) =
+    fun fileHelper time (rootDir:media_directories) (file:FileInfo) (p:IPersistence) ->
+      let newMedia = makeNewF fileHelper time rootDir file
       let fn = state {
         let! items = matchF newMedia
-        let! dbRec = updateF newMedia items
-        return dbRec
+        return! updateF newMedia items
       }
       State.execute fn p
 
   type RemoveOldHandler = DateTime -> IPersistence -> IPersistence
   type FileHandler = FileHelper -> DateTime -> media_directories -> FileInfo -> IPersistence -> IPersistence
-  let updateMedia ( (fileHandlerF:FileHandler), (removeOldF:RemoveOldHandler)) =
+  let updateMedia ((fileHandlerF:FileHandler), (removeOldF:RemoveOldHandler)) =
     fun time (fh:FileHelper) (dir:media_directories) (per:IPersistence) ->
       
       let foldFile p file = fileHandlerF fh time dir file p
