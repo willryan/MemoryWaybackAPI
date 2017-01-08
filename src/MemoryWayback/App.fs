@@ -3,39 +3,29 @@ module MemoryWayback.App
 open System
 open System.Diagnostics
 open Suave
-open Suave.Web
-open Suave.Json
-open Suave.Http
-open Suave.Http
-open Suave.Files
-open Suave.Successful
-open Suave.RequestErrors
 open Suave.Operators
-open Suave.EventSource
 open Suave.Filters
-open Suave.Writers
 open Suave.Utils
 open System.IO
 open System.Text
 open ExtCore.Control
 open MemoryWayback.DbTypes
 open MemoryWayback.Types
-open MemoryWayback.MediaQuery
 open MemoryWayback.Persistence
 open MemoryWayback.OrmlitePersistence
 open MemoryWayback.MemoryPersistence
-open MemoryWayback.FileHelper
 open Newtonsoft.Json
 
 //let logger = Loggers.sane_defaults_for Debug
 
 let getDbPersistence () = OrmlitePersistence() :> IPersistence
 
-let getMemoryPersistence dirs = 
-  let time = DateTime.Now
+let loadPersistence = 
+  MediaLibraryUpdate.updateMedia DateTime.Now FileHelper.realFileHelper
+
+let getMemoryPersistence = 
   let per = MemoryPersistence("mem",[],mediasId) :> IPersistence
-  let res = List.fold (fun p d -> MediaLibraryUpdate.updateMedia time realFileHelper d p) per dirs
-  res
+  loadPersistence per
 
 let mutable Persistence = getMemoryPersistence []
 
@@ -46,8 +36,8 @@ let persist stateFunc =
 
 let serSettings = new JsonSerializerSettings(ContractResolver = new Serialization.CamelCasePropertyNamesContractResolver())
 let okJson o =
-  OK (JsonConvert.SerializeObject(o, serSettings))
-    >=> setMimeType "application/json"
+  Successful.OK (JsonConvert.SerializeObject(o, serSettings))
+    >=> Writers.setMimeType "application/json"
 
 let parseDateParam ctx parm deflt =
   let date = choice {
@@ -74,7 +64,7 @@ let parseTypes ctx parm deflt =
       |> List.map (fun v -> Enum.Parse(typeof<MediaType>, v) :?> MediaType)
     })
 
-let handleQuery ctx =
+let getQuery ctx = 
   printfn "%A" ctx.request.query
   let fromDt = parseDateParam ctx "from" (DateTime(0L))
   let toDt = parseDateParam ctx "to" DateTime.UtcNow
@@ -86,14 +76,17 @@ let handleQuery ctx =
     Types = typeEnums
   }
   printfn "%A" o
-  (okJson <| persist (getResults o)) ctx
+  o
+
+let handleQuery ctx =
+  let o = getQuery ctx
+  let results = persist (MediaQuery.getResults o)
+  okJson results ctx
 
 
 let app publicDir mediaDirs =
   let browseMount (mnt,path) =
-    let dir = 
-      mediaDirs
-      |> List.find (fun dir -> dir.Mount = mnt)
+    let dir = List.find (fun dir -> dir.Mount = mnt) mediaDirs
     Files.browseFile dir.Path path
   choose
     [ GET >=> choose
@@ -109,12 +102,12 @@ let defaultArgs = [| "file" ; "." |]
 
 let startApp (dirs : MediaDirectory list) =
   let mimeTypes =
-    defaultMimeTypesMap
+    Writers.defaultMimeTypesMap
       @@ (fun ext ->
         maybe {
           let! suffix = Map.tryFind ext FileHelper.videoExtensionsToMime
           let mimeType = sprintf "video/%s" suffix
-          return! createMimeType mimeType false
+          return! Writers.createMimeType mimeType false
         }
       )
   let publicDir = Path.Combine(System.Environment.CurrentDirectory, "public")

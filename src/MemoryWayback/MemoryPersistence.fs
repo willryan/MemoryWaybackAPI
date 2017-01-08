@@ -17,7 +17,7 @@ let mediasGetId (o:obj) : int =
 
 let mediasSetId (o:obj) (id:int) : obj =
   let r = o :?> medias
-  { r with Id = id} :> obj
+  { r with Id = id } :> obj
 
 let mediasId =
   {
