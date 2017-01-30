@@ -12,12 +12,16 @@ type DbIdentity =
   }
 
 let mediasGetId (o:obj) : int =
-  let r = o :?> medias
-  r.Id
+  match o with
+  | :? medias as m -> m.Id 
+  | :? media_directories as md -> md.Id
+  | _ -> raise <| new System.Exception(sprintf "type %A not supported" o)
 
 let mediasSetId (o:obj) (id:int) : obj =
-  let r = o :?> medias
-  { r with Id = id } :> obj
+  match o with
+  | :? medias as m -> box { m with Id = id }
+  | :? media_directories as md -> box { md with Id = id }
+  | _ -> raise <| new System.Exception(sprintf "type %A not supported" o)
 
 let mediasId =
   {

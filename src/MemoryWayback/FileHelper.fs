@@ -8,6 +8,7 @@ open ExtCore.Control
 open System.Text.RegularExpressions
 open System.Linq
 open MemoryWayback.Types
+open MemoryWayback.FileHelperTypes
 
 let photoExtensions = [".jpg";".jpeg"] //;".png";".bmp"]
 let videoExtensionsToMime = 
@@ -34,13 +35,6 @@ let (|Photo|Video|Other|) (ext:string) =
     Video
   else
     Other ext
-
-type FileHelper = {
-  urlBuilder : MediaDirectory -> FileInfo -> string
-  takenTime : FileInfo -> DateTime option
-  fileFinder : MediaDirectory -> FileInfo list
-  transformPath : MediaDirectory -> string -> string
-}
 
 module Internal =
   let urlBuilder (rootDir:MediaDirectory) (file:FileInfo) =

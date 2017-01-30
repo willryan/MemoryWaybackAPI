@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Name>MemoryWayback</Name>
@@ -43,11 +43,12 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Types/Persistence.fs" />
+    <Compile Include="Types/DbTypes.fs" />
+    <Compile Include="Types/Types.fs" />
+    <Compile Include="Types/FileHelper.fs" />
     <Compile Include="Util.fs" />
-    <Compile Include="Persistence.fs" />
     <Compile Include="OrmlitePersistence.fs" />
-    <Compile Include="DbTypes.fs" />
-    <Compile Include="Types.fs" />
     <Compile Include="FileHelper.fs" />
     <Compile Include="MediaQuery.fs" />
     <Compile Include="MediaLibraryUpdate.fs" />
@@ -56,15 +57,16 @@
     <None Include="Script.fsx" />
     <None Include="paket.references" />
     <None Include="paket.template" />
-    <Content Include="any\netstandard1.6\FSharp.Core.optdata">
+    <Content Include="any/netstandard1.6/FSharp.Core.optdata">
       <Paket>True</Paket>
     </Content>
-    <Content Include="any\netstandard1.6\FSharp.Core.sigdata">
+    <Content Include="any/netstandard1.6/FSharp.Core.sigdata">
       <Paket>True</Paket>
     </Content>
     <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Types/FileHelper.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Choose>

@@ -5,6 +5,7 @@ open System.Net
 open System.IO
 open ExtCore.Control
 open ExifLib
+open MemoryWayback.FileHelperTypes
 open MemoryWayback.FileHelper
 open MemoryWayback.Persistence
 open MemoryWayback.DbTypes
